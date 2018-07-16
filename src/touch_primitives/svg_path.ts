@@ -1,3 +1,4 @@
+/* tslint:disable */
 import * as cjs from 'constraintjs';
 import { EventEmitter } from 'events';
 import {last, has, isFunction, tail, map} from 'lodash';

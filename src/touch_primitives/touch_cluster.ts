@@ -1,3 +1,4 @@
+/* tslint:disable */
 import * as cjs from 'constraintjs';
 import {filter, each, isArray, every, keys, last, map, extend, some, bind} from 'lodash';
 import {CrossEvent} from './cross_event';
@@ -490,7 +491,7 @@ export class TouchCluster extends EventEmitter {
 		touchClusters.push(this);
 		if(touchClusters.length === 1) { addListeners(); }
 	};
-	public addCrossListener(path:Path, callback:Listener):this {
+	public addCrossListener(path:Path, callback:Function):this {
 		const crossEvent = new CrossEvent({
 			cluster: this,
 			path

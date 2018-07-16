@@ -21,6 +21,7 @@
     "dagre": "^0.8.2",
     "event-emitter": "^0.3.5",
     "lodash": "^4.17.10",
+    "node-sass-chokidar": "^1.3.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "snapsvg": "^0.5.1",

@@ -1,14 +1,15 @@
+/* tslint:disable */
 import { EventEmitter } from 'events';
 import {TouchCluster} from './touch_cluster';
 import {Path} from './svg_path';
 import {map} from 'lodash';
 
 export interface CrossEventOptions {
-	path?:Path,
-	cluster?:TouchCluster,
-	minVelocity?:number,
-	maxVelocity?:number
-};
+	path?: Path;
+	cluster?: TouchCluster;
+	minVelocity?: number;
+	maxVelocity?: number;
+}
 
 export class CrossEvent extends EventEmitter {
 	constructor(private options?:CrossEventOptions) {
