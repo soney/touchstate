@@ -286,7 +286,7 @@ function updateTouchDistributions(addedTouches, removedTouches?, movedTouches?) 
 										smallestDistances.splice(numFingers, numFingers-smallestDistances.length);
 									}
 
-									largestSmallDistance = last(smallestDistances).distance;
+									largestSmallDistance = (last(smallestDistances) as any).distance;
 								}
 							}
 						}
@@ -301,8 +301,8 @@ function updateTouchDistributions(addedTouches, removedTouches?, movedTouches?) 
 
 					if(touchCluster.options.maxRadius) {
 						radiusOK = true;
-						var touches = map(closestTouchArr, function(identifier) {
-								return touches.get(identifier);
+						let touches = map(closestTouchArr, function(identifier) {
+								return (touches as any).get(identifier);
 							}),
 							center = {
 								x: average(map(touches, 'x')),
@@ -446,7 +446,7 @@ export class TouchCluster extends EventEmitter {
 					while(diff < 0) { diff += twoPI; }
 					return diff;
 				});
-			let averageDiff = average(angleDiffs);
+			let averageDiff = average(angleDiffs as number[]);
 			while(averageDiff >= Math.PI) {
 				averageDiff -= twoPI;
 			}

@@ -12,11 +12,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/bootstrap": "^4.1.2",
     "@types/dagre": "^0.7.40",
     "@types/event-emitter": "^0.3.2",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
     "@types/snapsvg": "^0.4.33",
+    "@types/svg.js": "^2.3.1",
+    "bootstrap": "^4.1.2",
     "constraintjs": "^0.9.7",
     "dagre": "^0.8.2",
     "event-emitter": "^0.3.5",
@@ -24,7 +27,7 @@
     "node-sass-chokidar": "^1.3.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
-    "snapsvg": "^0.5.1",
+    "svg.js": "^2.6.5",
     "t2sm": "git+https://github.com/soney/t2sm.git"
   },
   "devDependencies": {

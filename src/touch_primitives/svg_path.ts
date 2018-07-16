@@ -212,7 +212,7 @@ export class Path {
 			if_stmt = last(popped_tree_node as Array<any>),
 			elif_tree = [];
 
-		if_stmt.push({
+		(if_stmt as any[]).push({
 			condition: cond,
 			tree: elif_tree
 		});
@@ -229,7 +229,7 @@ export class Path {
 			if_stmt = last(popped_tree_node as Array<any>),
 			else_tree = [];
 
-		if_stmt.push({
+		(if_stmt as any[]).push({
 			tree: else_tree
 		});
 
