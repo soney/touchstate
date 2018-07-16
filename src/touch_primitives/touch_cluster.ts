@@ -3,7 +3,7 @@ import {filter, each, isArray, every, keys, last, map, extend, some, bind} from 
 import {CrossEvent} from './cross_event';
 import {Path} from './svg_path';
 import * as Snap from 'snapsvg';
-import { EventEmitter, Listener } from 'events';
+import { EventEmitter } from 'events';
 
 /*
  * downInside
