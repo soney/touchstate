@@ -2,7 +2,7 @@
 import * as cjs from 'constraintjs';
 import {filter, each, isArray, every, keys, last, map, extend, some, bind} from 'lodash';
 import {CrossEvent} from './cross_event';
-import {Path} from './svg_path';
+import {Path} from './Path';
 import * as Snap from 'snapsvg';
 import { EventEmitter } from 'events';
 

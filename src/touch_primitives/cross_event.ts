@@ -1,7 +1,7 @@
 /* tslint:disable */
 import { EventEmitter } from 'events';
-import {TouchCluster} from './touch_cluster';
-import {Path} from './svg_path';
+import {TouchCluster} from './TouchCluster';
+import {Path} from './Path';
 import {map} from 'lodash';
 
 export interface CrossEventOptions {

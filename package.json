@@ -18,6 +18,7 @@
     "@types/lodash": "^4.14.112",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
+    "@types/react-sortable-hoc": "^0.6.3",
     "@types/snapsvg": "^0.4.33",
     "@types/svg.js": "^2.3.1",
     "bootstrap": "^4.1.2",
@@ -29,6 +30,7 @@
     "react": "^16.4.1",
     "react-contextmenu": "^2.9.2",
     "react-dom": "^16.4.1",
+    "react-sortable-hoc": "^0.8.3",
     "svg.js": "^2.6.5",
     "t2sm": "git+https://github.com/soney/t2sm.git"
   },

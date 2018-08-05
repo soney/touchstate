@@ -183,7 +183,7 @@ export class Path {
 		return this;
 	};
 
-	public circle(cx:number, cy:number, r:number):this {
+	public circle(cx:numberOrConstraint, cy:numberOrConstraint, r:numberOrConstraint):this {
 		return this.ellipse(cx, cy, r, r);
 	};
 
