@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell } from './Cell';
 import { Path } from '../touch_primitives/Path';
+import { SDBDoc } from 'sdb-ts';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 
 // const SortableItem = SortableElement(({value}: {value: string}) =>
@@ -43,6 +44,8 @@ type Square = {
 };
 
 interface PathSpecDisplayProps {
+    path: (string|number)[];
+    doc: SDBDoc<any>;
 }
 interface PathSpecDisplayState {
     type: PathType;

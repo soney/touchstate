@@ -1,23 +1,17 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
+import { TouchCluster } from '../touch_primitives/TouchCluster';
+import { SDBClient, SDBDoc } from 'sdb-ts';
 
 interface TouchGroupProps {
+    path: (string|number)[];
+    doc: SDBDoc<any>;
 }
 interface TouchGroupState {
 }
 
 export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGroupState> {
-    public static defaultProps: TouchGroupProps  = {
-    };
-
-    private downInside: cjs.Constraint;
-    private downOutside: cjs.Constraint;
-    private numFingers: cjs.Constraint;
-    private maxRadius: cjs.Constraint;
-    private maxTouchInterval: cjs.Constraint;
-    private greedy: cjs.Constraint;
-
     public constructor(props: TouchGroupProps) {
         super(props);
         this.state = {
@@ -38,21 +32,21 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
     }
 
     private onNFChange = (event: CellChangeEvent) => {
-        this.numFingers = event.constraint;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('numFingers'), event.value);
     }
     private onDIChange = (event: CellChangeEvent) => {
-        this.downInside = event.constraint;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('downInside'), event.value);
     }
     private onDOChange = (event: CellChangeEvent) => {
-        this.downOutside = event.constraint;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('downOutside'), event.value);
     }
     private onMRChange = (event: CellChangeEvent) => {
-        this.maxRadius = event.constraint;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('maxRadius'), event.value);
     }
     private onMTIChange = (event: CellChangeEvent) => {
-        this.maxTouchInterval = event.constraint;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('maxTouchInterval'), event.value);
     }
     private onGChange = (event: CellChangeEvent) => {
-        this.greedy = event.constraint;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('greedy'), event.value);
     }
 }

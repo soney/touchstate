@@ -4,7 +4,7 @@ import * as cjs from 'constraintjs';
 enum ClickState { IDLE, EDITING }
 
 export interface CellChangeEvent {
-    constraint: cjs.Constraint;
+    value: string;
 }
 
 interface CellProps {
@@ -20,7 +20,7 @@ interface CellState {
 export class Cell extends React.Component<CellProps, CellState> {
     public static defaultProps: CellProps  = {
         text: '',
-        placeholder: '(empty)'
+        placeholder: '(empty)',
     };
 
     private text: string;
@@ -33,7 +33,7 @@ export class Cell extends React.Component<CellProps, CellState> {
             state: ClickState.IDLE
         };
         this.text = this.props.text;
-        this.updateConstraint();
+        this.emitUpdate();
     }
 
     public render(): React.ReactNode {
@@ -69,13 +69,9 @@ export class Cell extends React.Component<CellProps, CellState> {
         }
     }
 
-    private updateConstraint(): void {
-        if (this.constraint) {
-            this.constraint.destroy();
-        }
-        this.constraint = cjs.createParsedConstraint(this.text, {});
+    private emitUpdate(): void {
         if (this.props.onChange) {
-            this.props.onChange({ constraint: this.constraint });
+            this.props.onChange({ value: this.text });
         }
     }
 
@@ -99,10 +95,9 @@ export class Cell extends React.Component<CellProps, CellState> {
         if (which === 13) { // Enter
             this.text = this.state.inputText;
             this.setState({ state: ClickState.IDLE });
-            this.updateConstraint();
+            this.emitUpdate();
         } else if (which === 27) { // ESC
             this.setState({ inputText: this.text, state: ClickState.IDLE });
         }
     }
-
 }

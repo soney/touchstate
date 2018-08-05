@@ -1,10 +1,10 @@
 /* tslint:disable */
 import * as cjs from 'constraintjs';
-import {filter, each, isArray, every, keys, last, map, extend, some, bind} from 'lodash';
+import {filter, each, isArray, every, keys, last, map, extend, some, bind, clone, memoize} from 'lodash';
 import {CrossEvent} from './cross_event';
 import {Path} from './Path';
-import * as Snap from 'snapsvg';
 import { EventEmitter } from 'events';
+import { isPointInsidePath } from './pathutils';
 
 /*
  * downInside
@@ -110,7 +110,7 @@ function _onTouchStart(event) {
 			if(downInside) {
 				downInsideOK = every(downInside as any[], function(path) {
 					var pathString = path.toString();
-					if(Snap.path.isPointInside(pathString, touch.pageX, touch.pageY)) {
+					if(isPointInsidePath(pathString, touch.pageX, touch.pageY)) {
 						return true;
 					} else {
 						return false;
@@ -121,7 +121,7 @@ function _onTouchStart(event) {
 			if(downOutside) {
 				downOutsideOK = every(downOutside as any[], function(path) {
 					var pathString = path.toString();
-					if(!Snap.path.isPointInside(pathString, touch.pageX, touch.pageY)) {
+					if(!isPointInsidePath(pathString, touch.pageX, touch.pageY)) {
 						return true;
 					} else {
 						return false;

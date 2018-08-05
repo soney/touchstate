@@ -31,6 +31,7 @@
     "react-contextmenu": "^2.9.2",
     "react-dom": "^16.4.1",
     "react-sortable-hoc": "^0.8.3",
+    "sdb-ts": "git+https://github.com/soney/sdb-ts.git",
     "svg.js": "^2.6.5",
     "t2sm": "git+https://github.com/soney/t2sm.git"
   },
