@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { FSMComponent, StateData, TransitionData } from './FSMComponent';
+import { FSMComponent, StateData, TransitionData } from './views/FSMComponent';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 
 import './index.css';

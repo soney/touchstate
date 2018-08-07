@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
-import { Path } from '../touch_primitives/Path';
 import { SDBDoc } from 'sdb-ts';
 import { clone } from 'lodash';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';

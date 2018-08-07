@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
-import { TouchCluster } from '../touch_primitives/TouchCluster';
 import { SDBClient, SDBDoc } from 'sdb-ts';
 
 interface TouchGroupProps {
