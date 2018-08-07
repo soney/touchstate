@@ -1,9 +1,12 @@
 import * as React from 'react';
-import { FSM, StateMachineDisplay, ForeignObjectDisplay } from 't2sm';
+import { FSM, StateMachineDisplay, ForeignObjectDisplay, SDBBinding } from 't2sm';
 import { first, tail } from 'lodash';
+import { SDBDoc } from 'sdb-ts';
 
 interface StateMachineDisplayProps {
     fsm: FSM<StateData, TransitionData>;
+    path: (string|number)[];
+    doc: SDBDoc<any>;
 }
 interface StateMachineDisplayState {
 }
@@ -20,8 +23,10 @@ export interface TransitionData {
 
 export class FSMComponent extends React.Component<StateMachineDisplayProps, StateMachineDisplayState> {
     private stateMachineDisplay: StateMachineDisplay;
+    private binding: SDBBinding;
     public constructor(props: StateMachineDisplayProps) {
         super(props);
+        this.binding = new SDBBinding(this.getFSM(), this.props.doc, this.props.path);
     }
 
     public render(): React.ReactNode {

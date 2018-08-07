@@ -11,14 +11,20 @@ import { TouchGroupDisplay } from './views/TouchGroupDisplay';
 import { SDBDoc, SDBClient } from 'sdb-ts';
 
 const fsm: FSM<StateData, TransitionData> = new FSM();
-const client: SDBClient = new SDBClient(new WebSocket(`http://${window.location.host}:3000`));
+const client: SDBClient = new SDBClient(new WebSocket(`ws://${window.location.hostname}:3000`));
 const doc: SDBDoc<any> = client.get('touchdoc', 'touchdoc');
 
-ReactDOM.render(
-    <div className="container">
-        <FSMComponent fsm={fsm} />
-        <TouchGroupDisplay doc={doc} path={['tg']} />
-        <PathSpecDisplay doc={doc} path={['ps']} />
-    </div>,
-    document.getElementById('root') as HTMLElement
-); 
+(async (): Promise<void> => {
+    doc.subscribe(() => {
+        console.log(doc.getData());
+    });
+    await doc.fetch();
+    ReactDOM.render(
+        <div className="container">
+            <FSMComponent doc={doc} path={['fsm']} fsm={fsm} />
+            <TouchGroupDisplay doc={doc} path={['tg']} />
+            <PathSpecDisplay doc={doc} path={['ps']} />
+        </div>,
+        document.getElementById('root') as HTMLElement
+    );
+})();

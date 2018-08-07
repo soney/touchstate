@@ -12,21 +12,30 @@ interface TouchGroupState {
 }
 
 export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGroupState> {
+    private static defaults = {
+        numFingers: 1,
+        downInside: null,
+        downOutside: null,
+        maxRadius: null,
+        maxTouchInterval: null,
+        greedy: false
+    };
     public constructor(props: TouchGroupProps) {
         super(props);
-        this.state = {
-        };
+        this.state = { };
+        this.props.doc.submitObjectReplaceOp(this.props.path, {});
     }
 
     public render(): React.ReactNode {
+        const defaults = TouchGroupDisplay.defaults;
         return (
             <div>
-                <div>numFingers: <Cell text="1" onChange={this.onNFChange} /></div>
-                <div>downInside: <Cell text="null" onChange={this.onDIChange} /></div>
-                <div>downOutside: <Cell text="null" onChange={this.onDOChange} /></div>
-                <div>maxRadius: <Cell text="null" onChange={this.onMRChange} /></div>
-                <div>maxTouchInterval: <Cell text="null" onChange={this.onMTIChange} /></div>
-                <div>greedy: <Cell text="null" onChange={this.onGChange} /></div>
+                <div>numFingers: <Cell text={`${defaults.numFingers}`} onChange={this.onNFChange} /></div>
+                <div>downInside: <Cell text={`${defaults.downInside}`} onChange={this.onDIChange} /></div>
+                <div>downOutside: <Cell text={`${defaults.downOutside}`} onChange={this.onDOChange} /></div>
+                <div>maxRadius: <Cell text={`${defaults.maxRadius}`} onChange={this.onMRChange} /></div>
+                <div>maxTouchInterval: <Cell text={`${defaults.maxTouchInterval}`} onChange={this.onMTIChange} /></div>
+                <div>greedy: <Cell text={`${defaults.greedy}`} onChange={this.onGChange} /></div>
             </div>
         );
     }

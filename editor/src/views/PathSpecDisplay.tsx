@@ -1,8 +1,9 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
-import { Cell } from './Cell';
+import { Cell, CellChangeEvent } from './Cell';
 import { Path } from '../touch_primitives/Path';
 import { SDBDoc } from 'sdb-ts';
+import { clone } from 'lodash';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 
 // const SortableItem = SortableElement(({value}: {value: string}) =>
@@ -52,7 +53,6 @@ interface PathSpecDisplayState {
 }
 
 export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathSpecDisplayState> {
-    private path: Path;
     private pathConstraints: { [name: string]: cjs.Constraint } = {
         lsx: null, lsy: null, lex: null, ley: null, ccx: null, ccy: null, ccr: null,
         rcx: null, rcy: null, rcw: null, rch: null
@@ -62,27 +62,29 @@ export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathS
         this.state = {
             type: 'line'
         };
+        this.props.doc.submitObjectReplaceOp(this.props.path, clone(this.state));
     }
 
-    public onCellChange(name: string, event: { constraint: cjs.Constraint }): void {
-        const {type} = this.state;
-        this.pathConstraints[name] = event.constraint;
-        if (this.path) {
-            this.path.destroy();
-        }
+    public onCellChange(name: string, event: CellChangeEvent): void {
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat(name), event.value);
+        // const {type} = this.state;
+        // this.pathConstraints[name] = event.constraint;
+        // if (this.path) {
+        //     this.path.destroy();
+        // }
 
-        this.path = new Path();
-        if (type === 'line') {
-            const { lsx, lsy, lex, ley } = this.pathConstraints;
-            this.path.M(lsx, lsy).L(lex, ley);
-        } else if (type === 'circle') {
-            const { ccx, ccy, ccr } = this.pathConstraints;
-            this.path.circle(ccx, ccy, ccr);
-        } else if (type === 'rectangle') {
-            const { rcx, rcy, rcw, rch } = this.pathConstraints;
-            this.path.rect(rcx, rcy, rcw, rch);
-        }
-        console.log(this.path.toString());
+        // this.path = new Path();
+        // if (type === 'line') {
+        //     const { lsx, lsy, lex, ley } = this.pathConstraints;
+        //     this.path.M(lsx, lsy).L(lex, ley);
+        // } else if (type === 'circle') {
+        //     const { ccx, ccy, ccr } = this.pathConstraints;
+        //     this.path.circle(ccx, ccy, ccr);
+        // } else if (type === 'rectangle') {
+        //     const { rcx, rcy, rcw, rch } = this.pathConstraints;
+        //     this.path.rect(rcx, rcy, rcw, rch);
+        // }
+        // console.log(this.path.toString());
     }
 
     public render(): React.ReactNode {
@@ -137,6 +139,7 @@ export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathS
 
     private handleSelectChange = (event: React.FormEvent<HTMLSelectElement>): void => {
         const type = event.currentTarget.value as PathType;
+        this.props.doc.submitObjectReplaceOp(this.props.path.concat('type'), type);
         this.setState({ type });
     }
 }
