@@ -26,7 +26,7 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
     private binding: SDBBinding;
     public constructor(props: StateMachineDisplayProps) {
         super(props);
-        this.binding = new SDBBinding(this.getFSM(), this.props.doc, this.props.path);
+        this.binding = new SDBBinding(this.props.doc, this.props.path, this.getFSM());
     }
 
     public render(): React.ReactNode {
