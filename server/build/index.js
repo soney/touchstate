@@ -11,7 +11,6 @@ var wss = new WebSocket.Server({ server: server });
 var sdbServer = new sdb_ts_1.SDBServer(wss);
 var doc = sdbServer.get('touchdoc', 'touchdoc');
 doc.createIfEmpty({ tg: {}, ps: {} });
-console.log('ok');
 app.use(express.static('../editor'));
 server.listen(port);
 console.log("Listening on port " + port);

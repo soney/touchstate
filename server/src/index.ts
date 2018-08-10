@@ -14,4 +14,4 @@ doc.createIfEmpty({ tg: {}, ps: {} });
 app.use(express.static('../editor'));
 
 server.listen(port); 
-console.log(`Listening on port ${port}`)
+console.log(`Listening on port ${port}`);

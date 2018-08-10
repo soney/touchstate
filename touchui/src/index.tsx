@@ -1,6 +1,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { TouchBehavior } from './TouchBehavior';
 // import { StateData, TransitionData } from '../../editor/src/views/FSMComponent';
+// import * as Snap from 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js';
+// snapsvg';
+// const Snap = require( 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js' );
 
 import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -12,16 +16,14 @@ const client: SDBClient = new SDBClient(new WebSocket(`ws://${window.location.ho
 const doc: SDBDoc<any> = client.get('touchdoc', 'touchdoc');
 
 (async (): Promise<void> => {
-    doc.subscribe(() => {
-        console.log(doc.getData());
-    });
+    doc.subscribe();
     await doc.fetch();
     const binding = new SDBBinding(doc, ['fsm']);
 
-    ReactDOM.render(
-        <div className="container">
-        HELLO
-        </div>,
-        document.getElementById('root') as HTMLElement
-    );
 })();
+ReactDOM.render(
+    <div className="container">
+        <TouchBehavior doc={doc} path={[]} />
+    </div>,
+    document.getElementById('root') as HTMLElement
+);

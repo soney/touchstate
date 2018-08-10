@@ -5,13 +5,12 @@ import 'jqueryui';
 
 $.widget("interstate.screen_touches", {
     options: {
-        ctx: false,
         paper: false,
         radius: 20,
         touchStartAnimationDuration: 100,
         touchEndAnimationDuration: 200,
-        defaultFill: ["#CCCCCC"],
-        defaultStroke: ["#999999"],
+        defaultFill: "#CCCCCC",
+        defaultStroke: "#999999",
         strokeWidth: "3px",
         clusterStrokeWidth: 6
     },
@@ -39,7 +38,6 @@ $.widget("interstate.screen_touches", {
     _addToPaper: function() {
         var paper = this.option("paper"),
             touchDisplays = this.touchDisplays = {},
-            ctx = this.option("ctx"),
             radius = this.option("radius"),
             defaultFill = this.option("defaultFill"),
             defaultStroke = this.option("defaultStroke");
@@ -73,11 +71,9 @@ $.widget("interstate.screen_touches", {
                                 stroke: stroke,
                                 "stroke-width": this.option("strokeWidth")
                             }).animate({
-                                r: this.option("radius"),
-                                opacity: 1
-                            },
-                            this.option("touchStartAnimationDuration"),
-                            mina.easeinout),
+                                ease: '<>', 
+                                delay: this.option("touchStartAnimationDuration")
+                            }).radius(this.option('radius')).opacity(1),
                         clusterStrokes: [],
                         pathKnown: !!touchPathStr,
                         path: paper.path("M"+x+","+y).attr({
@@ -102,10 +98,9 @@ $.widget("interstate.screen_touches", {
                                 "stroke-width": this.option("strokeWidth"),
                                 opacity: 0
                             }).animate({
-                                r: this.option("radius"),
-                                opacity: 1
-                            }, this.option("touchStartAnimationDuration"),
-                            mina.easeinout)
+                                ease: '<>', 
+                                delay: this.option("touchStartAnimationDuration")
+                            }).radius(this.option("radius")).opacity(1)
                     };
                     this._updateColor(id);
                 });
@@ -144,7 +139,7 @@ $.widget("interstate.screen_touches", {
                         circle = touchDisplay.circle,
                         pathDisplay = touchDisplay.path,
                         animPath = touchDisplay.animPath,
-                        length = pathDisplay.getTotalLength(),
+                        length = pathDisplay.length(),
                         startCircle = touchDisplay.startCircle,
                         clusterStrokes = touchDisplay.clusterStrokes,
                         r = circle.attr("r");
@@ -160,50 +155,51 @@ $.widget("interstate.screen_touches", {
                         startTime = (new Date()).getTime(),
                         endTime = startTime + animation_duration,
                         easingFormula = mina.easeinout,
-                        nearStart = pathDisplay.getPointAtLength(Math.min(5, 0.01*length)),
-                        nearEnd = pathDisplay.getPointAtLength(Math.max(length-5, 0.99*length)),
+                        nearStart = pathDisplay.pointAt(Math.min(5, 0.01*length)),
+                        nearEnd = pathDisplay.pointAt(Math.max(length-5, 0.99*length)),
                         pct;
 
                     animPath.attr({
                         "stroke-width": pathDisplay.attr("stroke-width"),
                         opacity: 1.0
-                    }).animate({
-                        opacity: 0.2
-                    });
+                    }).animate().opacity(0.2);
 
                     circle.attr({
                             cx: x,
                             cy: y
                         })
                         .animate({
-                            r: 2*r/3,
-                            cx: nearEnd.x,
-                            cy: nearEnd.y,
-                            opacity: 0
-                        }, animation_duration, mina.easeinout, function() {
+                            delay: animation_duration,
+                            ease: '<>'
+                        })
+                        .center(nearEnd.x, nearEnd.y)
+                        .radius(2*r/3)
+                        .opacity(0)
+                        .once(1, () => {
                             circle.remove();
                         });
 
                     each(clusterStrokes, function(clusterStroke) {
-                        clusterStroke.attr({
-                            cx: x,
-                            cy: y
-                        }).animate({
-                            r: 2*clusterStroke.attr("r")/3,
-                            cx: nearEnd.x,
-                            cy: nearEnd.y,
-                            opacity: 0
-                        }, animation_duration, mina.easeinout, function() {
+                        clusterStroke.center(x, y)
+                        .animate({
+                            delay: animation_duration,
+                            ease: '<>'
+                        })
+                        .center(nearEnd.x, nearEnd.y)
+                        .radius(2*clusterStroke.attr("r")/3)
+                        .opacity(0)
+                        .once(1, () => {
                             clusterStroke.remove();
                         });
                     });
 
                     startCircle.animate({
-                        r: 1.1*startCircle.attr("r"),
-                        opacity: 0,
-                        cx: nearStart.x,
-                        cy: nearStart.y,
-                    }, animation_duration, mina.easeinout, function() {
+                        delay: animation_duration,
+                        ease: '<>'
+                    }).center(nearStart.x, nearStart.y)
+                    .radius(1.1*startCircle.attr("r"))
+                    .opacity(0)
+                    .once(1, () => {
                         startCircle.remove();
                     });
 
@@ -211,8 +207,9 @@ $.widget("interstate.screen_touches", {
                             opacity: 0.5
                         })
                         .animate({
-                            opacity: 0
-                        }, animation_duration, mina.easeinout, function() {
+                            delay: animation_duration,
+                            ease: '<>'
+                        }).opacity(0).once(1, () => {
                             pathDisplay.remove();
                         });
 
@@ -290,22 +287,20 @@ $.widget("interstate.screen_touches", {
 
                         if(info.circle) {
                             info.circle.animate({
-                                    r: radius
-                                },
-                                this.option("touchStartAnimationDuration"),
-                                mina.easeinout);
+                                delay: this.option("touchStartAnimationDuration"),
+                                ease: '<>'
+                            }).radius(radius);
                         } else {
                             var clusterStroke = info.circle = paper.circle(circle.attr("cx"), circle.attr("cy"), 5*radius/4).attr({
-                                fill: "none",
-                                stroke: info.fill,
-                                "stroke-width": clusterStrokeWidth,
-                                opacity: 0.2
-                            }).animate({
-                                r: radius,
-                                opacity: 1
-                            },
-                            this.option("touchStartAnimationDuration"),
-                            mina.easeinout);
+                                    fill: "none",
+                                    stroke: info.fill,
+                                    "stroke-width": clusterStrokeWidth,
+                                    opacity: 0.2
+                                })
+                                .animate({
+                                    delay: this.option("touchStartAnimationDuration"),
+                                    ease: '<>'
+                                }).radius(radius).opacity(1)
                             clusterStrokes.push(clusterStroke);
                         }
                         info.circle.was_found = was_found_indicator;
