@@ -36,6 +36,12 @@ export class Path {
 		pathList.addPath(this);
 	};
 
+	public clear(): void {
+		this.tree.splice(0, this.tree.length());
+		this.curr_tree_node = this.tree;
+		this.stack = [ this.tree ];
+	}
+
 	public m = this.relativeMoveTo;
 	public moveTo = this.relativeMoveTo;
 	public relativeMoveTo(x:numberOrConstraint, y:numberOrConstraint):this {

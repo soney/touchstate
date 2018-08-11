@@ -17,7 +17,6 @@ const doc: SDBDoc<any> = client.get('touchdoc', 'touchdoc');
 (async (): Promise<void> => {
     doc.subscribe();
     await doc.fetch();
-    const binding = new SDBBinding(doc, ['fsm']);
 
 })();
 ReactDOM.render(

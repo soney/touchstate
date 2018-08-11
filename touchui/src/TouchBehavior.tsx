@@ -2,13 +2,15 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { SDBClient, SDBDoc } from 'sdb-ts';
-import { FSM, SDBBinding } from 't2sm/built';
+import { FSM, SDBBinding } from 't2sm';
 // import { StateData, TransitionData } from '../../editor/src/views/FSMComponent';
 import * as jQuery from 'jquery';
 import './touchscreen/touchscreen_layer';
 import * as SVG from 'svg.js';
 import { Path } from './touch_primitives/Path';
 import { TouchCluster } from './touch_primitives/TouchCluster';
+import { TouchClusterBinding } from './bindings/TouchClusterBinding';
+import { PathBinding } from './bindings/PathBinding';
 
 interface TouchBehaviorProps {
     path: (string|number)[];
@@ -83,6 +85,12 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         await this.renderedPromise;
         this.binding = new SDBBinding(doc, ['fsm']);
         this.fsm = this.binding.getFSM();
+
+        const pb = new PathBinding(doc, ['ps']);
+        const path = pb.getPath();
+        this.addPath(path);
+        const tg = new TouchClusterBinding(doc, ['tg']);
+        const c = tg.getCluster();
     }
 
     private getDoc(): SDBDoc<any> {
