@@ -2,6 +2,9 @@ import * as React from 'react';
 import { FSM, StateMachineDisplay, ForeignObjectDisplay, SDBBinding } from 't2sm';
 import { first, tail } from 'lodash';
 import { SDBDoc } from 'sdb-ts';
+import { DISPLAY_TYPE } from 't2sm/built/views/StateMachineDisplay';
+import * as ReactDOM from 'react-dom';
+import { TransitionContents } from './TransitionContents';
 
 interface StateMachineDisplayProps {
     fsm: FSM<StateData, TransitionData>;
@@ -18,7 +21,11 @@ export interface StateData {
 }
 
 export interface TransitionData {
-
+    type: string;
+    timeoutDelay?: number;
+    selectedTouchGroup?: string;
+    selectedPath?: string;
+    touchEventType?: string;
 }
 
 export class FSMComponent extends React.Component<StateMachineDisplayProps, StateMachineDisplayState> {
@@ -37,7 +44,16 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
 
     private getForeignObject  = (fod: ForeignObjectDisplay) => {
         const el = fod.getElement();
-        console.log(el);
+        const body = document.createElement('body');
+        const container = document.createElement('div');
+        el.appendChild(body);
+        body.appendChild(container);
+        if (fod.getDisplayType() === DISPLAY_TYPE.TRANSITION) {
+            ReactDOM.render(
+                <TransitionContents fod={fod} fsm={this.props.fsm} />,
+                container
+            );
+        }
     }
 
     private getFSM(): FSM<StateData, TransitionData> { return this.props.fsm; }

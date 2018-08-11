@@ -15,9 +15,7 @@ const client: SDBClient = new SDBClient(new WebSocket(`ws://${window.location.ho
 const doc: SDBDoc<any> = client.get('touchdoc', 'touchdoc');
 
 (async (): Promise<void> => {
-    doc.subscribe(() => {
-        console.log(doc.getData());
-    });
+    doc.subscribe();
     await doc.fetch();
     ReactDOM.render(
         <div className="container">

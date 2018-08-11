@@ -22,7 +22,7 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
     public constructor(props: TouchGroupProps) {
         super(props);
         this.state = { };
-        this.props.doc.submitObjectReplaceOp(this.props.path, {});
+        this.initialize();
     }
 
     public render(): React.ReactNode {
@@ -56,5 +56,15 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
     }
     private onGChange = (event: CellChangeEvent) => {
         this.props.doc.submitObjectReplaceOp(this.props.path.concat('greedy'), event.value);
+    }
+
+    private async initialize(): Promise<void> {
+        await this.props.doc.fetch();
+        const data = this.props.doc.traverse(this.props.path);
+        if (data) {
+            console.log(data);
+        } else {
+            this.props.doc.submitObjectReplaceOp(this.props.path, {});
+        }
     }
 }
