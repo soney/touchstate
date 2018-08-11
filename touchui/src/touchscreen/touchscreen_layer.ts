@@ -1,6 +1,10 @@
 /* tslint:disable */
 import * as $ from 'jquery';
 import 'jqueryui';
+import './simple_touch_view';
+import './svg_path_view';
+import { Path } from '../touch_primitives/Path';
+import  * as cjs from 'constraintjs';
 
 $.widget("interstate.touchscreen_layer", {
     options: {

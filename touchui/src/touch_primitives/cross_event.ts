@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import {TouchCluster} from './TouchCluster';
 import {Path} from './Path';
 import {map} from 'lodash';
+import * as cjs from 'constraintjs';
 
 export interface CrossEventOptions {
 	path?: Path;
@@ -12,14 +13,28 @@ export interface CrossEventOptions {
 }
 
 export class CrossEvent extends EventEmitter {
+	private liveFn;
 	constructor(private options?:CrossEventOptions) {
 		super();
+		// let pathString: string;
+		// this.liveFn = cjs.liven(() => {
+		// 	const path = this.options.path;
+		// 	this.onCross();
+		// 	if(pathString) {
+		// 		removeCrossingPathListener(pathString);
+		// 	}
+		// 	pathString = path.toString();
+		// 	addCrossingPathListener(this.getCluster(), pathString, this._onCross);
+		// 	console.log('add');
+		// });
+		addCrossingPathListener(this.getCluster(), this.getPath(), this._onCross);
 	};
 	public getPath():Path {
 		return this.options.path;
 	};
 	public destroy() {
 		removeCrossingPathListener(this.getPath());
+		this.liveFn.destroy();
 	};
 	public getCluster():TouchCluster {
 		return this.options.cluster;

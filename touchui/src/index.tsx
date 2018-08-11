@@ -7,7 +7,6 @@ import { TouchBehavior } from './TouchBehavior';
 // const Snap = require( 'imports-loader?this=>window,fix=>module.exports=0!snapsvg/dist/snap.svg.js' );
 
 import './index.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { FSM, SDBBinding } from 't2sm';
 import { SDBDoc, SDBClient } from 'sdb-ts';
 

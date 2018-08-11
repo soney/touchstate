@@ -163,17 +163,11 @@ import 'jqueryui';
                         });
                         */
                     } else {
-                        paper_path.attr("path", "M0,0");
-                        rotationPath.attr("path", "M0,0");
+                        paper_path.plot("M0,0");
+                        rotationPath.plot("M0,0");
 
-                        startCenterCircle.attr({
-                            cx: -3*startCenterCircle.attr("r"),
-                            cy: -3*startCenterCircle.attr("r")
-                        });
-                        centerCircle.attr({
-                            cx: -3*centerCircle.attr("r"),
-                            cy: -3*centerCircle.attr("r")
-                        });
+                        startCenterCircle.center(-3*startCenterCircle.attr("r"), -3*startCenterCircle.attr("r"));
+                        centerCircle.center(-3*startCenterCircle.attr("r"), -3*startCenterCircle.attr("r"));
 
                         for(var touchId in touchStartDisplays) {
                             if(touchStartDisplays.hasOwnProperty(touchId)) {

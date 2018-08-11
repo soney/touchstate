@@ -35,7 +35,7 @@ $.widget("interstate.svg_path", {
                 pathStr = "M0,0";
             }
 
-            paper_path.attr("path", pathStr);
+            paper_path.plot(pathStr);
         }, {
             context: this,
             on_destroy: function() {

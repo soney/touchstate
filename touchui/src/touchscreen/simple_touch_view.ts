@@ -65,15 +65,12 @@ $.widget("interstate.screen_touches", {
                         stroke = defaultStroke;
 
                     touchDisplays[id] = {
-                        circle: paper.circle(x, y, 5*this.option("radius")/4).attr({
+                        circle: paper.circle(5*this.option("radius")/4).move(x, y).attr({
                                 opacity: 0.2,
                                 fill: fill,
                                 stroke: stroke,
                                 "stroke-width": this.option("strokeWidth")
-                            }).animate({
-                                ease: '<>', 
-                                delay: this.option("touchStartAnimationDuration")
-                            }).radius(this.option('radius')).opacity(1),
+                            }),
                         clusterStrokes: [],
                         pathKnown: !!touchPathStr,
                         path: paper.path("M"+x+","+y).attr({
@@ -91,17 +88,22 @@ $.widget("interstate.screen_touches", {
                             "stroke-linecap": "round",
                             fill: "none"
                         }),
-                        startCircle: paper.circle(x, y, 0).attr({
+                        startCircle: paper.circle(0).move(x,y).attr({
                                 fill: fill,
                                 stroke: fill,
                                 "fill-opacity": 0.1,
                                 "stroke-width": this.option("strokeWidth"),
                                 opacity: 0
-                            }).animate({
-                                ease: '<>', 
-                                delay: this.option("touchStartAnimationDuration")
-                            }).radius(this.option("radius")).opacity(1)
+                            }),
                     };
+                    touchDisplays[id].circle.animate({
+                        ease: '<>', 
+                        duration: this.option("touchStartAnimationDuration")
+                    }).radius(this.option('radius')).opacity(1),
+                    touchDisplays[id].startCircle.animate({
+                        ease: '<>', 
+                        duration: this.option("touchStartAnimationDuration")
+                    }).radius(this.option('radius')).opacity(1),
                     this._updateColor(id);
                 });
             }, this)).on('touchmove.simple_touch_view', bind(function(jq_event) {
@@ -114,19 +116,11 @@ $.widget("interstate.screen_touches", {
                         pathDisplay = touchDisplay.path,
                         clusterStrokes = touchDisplay.clusterStrokes;
 
-                    touchDisplay.circle.attr({
-                        cx: x,
-                        cy: y
-                    });
-                    pathDisplay.attr({
-                        path: pathDisplay.attr("path") + "L" + x + "," + y
-                    });
+                    touchDisplay.circle.center(x, y);
+                    pathDisplay.plot(`${pathDisplay.attr("d")} L ${x},${y}`);
 
                     each(clusterStrokes, function(clusterStroke) {
-                        clusterStroke.attr({
-                            cx: x,
-                            cy: y
-                        });
+                        clusterStroke.center(x, y);
                     });
                 });
             }, this)).on('touchend.simple_touch_view touchcancel.simple_touch_view', bind(function(jq_event) {
@@ -146,7 +140,7 @@ $.widget("interstate.screen_touches", {
 
                     touchDisplay.animatingRemoval = true;
 
-                    pathDisplay.attr("path", pathDisplay.attr("path") + "L"+x+","+y);
+                    pathDisplay.plot(`${pathDisplay.attr("d")} L ${x}, ${y}`);
                     if(!touchDisplay.pathKnown) {
                         animPath.attr("path", pathDisplay.attr("path"));
                     }
@@ -154,7 +148,6 @@ $.widget("interstate.screen_touches", {
                     var animation_duration = Math.min(Math.max(200, length/3), 900),
                         startTime = (new Date()).getTime(),
                         endTime = startTime + animation_duration,
-                        easingFormula = mina.easeinout,
                         nearStart = pathDisplay.pointAt(Math.min(5, 0.01*length)),
                         nearEnd = pathDisplay.pointAt(Math.max(length-5, 0.99*length)),
                         pct;
@@ -169,7 +162,7 @@ $.widget("interstate.screen_touches", {
                             cy: y
                         })
                         .animate({
-                            delay: animation_duration,
+                            duration: animation_duration,
                             ease: '<>'
                         })
                         .center(nearEnd.x, nearEnd.y)
@@ -182,7 +175,7 @@ $.widget("interstate.screen_touches", {
                     each(clusterStrokes, function(clusterStroke) {
                         clusterStroke.center(x, y)
                         .animate({
-                            delay: animation_duration,
+                            duration: animation_duration,
                             ease: '<>'
                         })
                         .center(nearEnd.x, nearEnd.y)
@@ -194,7 +187,7 @@ $.widget("interstate.screen_touches", {
                     });
 
                     startCircle.animate({
-                        delay: animation_duration,
+                        duration: animation_duration,
                         ease: '<>'
                     }).center(nearStart.x, nearStart.y)
                     .radius(1.1*startCircle.attr("r"))
@@ -207,7 +200,7 @@ $.widget("interstate.screen_touches", {
                             opacity: 0.5
                         })
                         .animate({
-                            delay: animation_duration,
+                            duration: animation_duration,
                             ease: '<>'
                         }).opacity(0).once(1, () => {
                             pathDisplay.remove();
@@ -218,8 +211,8 @@ $.widget("interstate.screen_touches", {
 
                         if(currTime <= endTime) {
                             var pct = ((currTime - startTime) / animation_duration),
-                                pos = pathDisplay.getPointAtLength(pct*length);
-                            animPath.attr("path", pathDisplay.getSubpath(length*pct, length));
+                                pos = pathDisplay.pointAt(pct*length);
+                            // animPath.attr("path", pathDisplay.getSubpath(length*pct, length));
                             requestAnimationFrame(updateStartCirclePosition);
                         } else {
                             animPath.remove();
@@ -287,7 +280,7 @@ $.widget("interstate.screen_touches", {
 
                         if(info.circle) {
                             info.circle.animate({
-                                delay: this.option("touchStartAnimationDuration"),
+                                duration: this.option("touchStartAnimationDuration"),
                                 ease: '<>'
                             }).radius(radius);
                         } else {
@@ -296,11 +289,11 @@ $.widget("interstate.screen_touches", {
                                     stroke: info.fill,
                                     "stroke-width": clusterStrokeWidth,
                                     opacity: 0.2
-                                })
-                                .animate({
-                                    delay: this.option("touchStartAnimationDuration"),
-                                    ease: '<>'
-                                }).radius(radius).opacity(1)
+                                });
+                            clusterStroke.animate({
+                                duration: this.option("touchStartAnimationDuration"),
+                                ease: '<>'
+                            }).radius(radius).opacity(1)
                             clusterStrokes.push(clusterStroke);
                         }
                         info.circle.was_found = was_found_indicator;

@@ -1,6 +1,6 @@
 /* tslint:disable */
 import { extend } from 'lodash';
-function getReplayBoundingBox(touch_log) {
+export function getReplayBoundingBox(touch_log) {
     var left = Number.POSITIVE_INFINITY,
         top = Number.POSITIVE_INFINITY,
         right = Number.NEGATIVE_INFINITY,
@@ -24,7 +24,7 @@ function getReplayBoundingBox(touch_log) {
         height: bottom - top
     };
 }
-function replayTouches(touch_log, options) {
+export function replayTouches(touch_log, options) {
     var root = window;
 
     options = extend({
