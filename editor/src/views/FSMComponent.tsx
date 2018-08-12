@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { FSM, StateMachineDisplay, ForeignObjectDisplay, SDBBinding } from 't2sm';
 import { first, tail } from 'lodash';
-import { SDBDoc } from 'sdb-ts';
+import { SDBDoc, SDBSubDoc } from 'sdb-ts';
 import { DISPLAY_TYPE } from 't2sm/built/views/StateMachineDisplay';
 import * as ReactDOM from 'react-dom';
 import { TransitionContents } from './TransitionContents';
-import { StateData, TransitionData } from '../../../interfaces';
+import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../../interfaces';
 
 interface StateMachineDisplayProps {
     fsm: FSM<StateData, TransitionData>;
@@ -13,6 +13,8 @@ interface StateMachineDisplayProps {
     doc: SDBDoc<any>;
 }
 interface StateMachineDisplayState {
+    paths: PathObj;
+    touchGroups: TouchGroupObj;
 }
 
 export enum TransitionType { START, TIMEOUT, TOUCH_GROUP }
@@ -20,9 +22,18 @@ export enum TransitionType { START, TIMEOUT, TOUCH_GROUP }
 export class FSMComponent extends React.Component<StateMachineDisplayProps, StateMachineDisplayState> {
     private stateMachineDisplay: StateMachineDisplay;
     private binding: SDBBinding;
+    private touchGroups: SDBSubDoc<TouchGroupObj>;
+    private paths: SDBSubDoc<PathObj>;
+
     public constructor(props: StateMachineDisplayProps) {
         super(props);
         this.binding = new SDBBinding(this.props.doc, this.props.path, this.getFSM());
+        this.touchGroups = this.props.doc.subDoc(['touchGroups']);
+        this.paths = this.props.doc.subDoc(['paths']);
+        this.state = {
+            touchGroups: this.touchGroups.getData(),
+            paths: this.paths.getData()
+        };
     }
 
     public render(): React.ReactNode {
@@ -39,7 +50,7 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
         body.appendChild(container);
         if (fod.getDisplayType() === DISPLAY_TYPE.TRANSITION) {
             ReactDOM.render(
-                <TransitionContents fod={fod} fsm={this.props.fsm} />,
+                <TransitionContents fod={fod} fsm={this.props.fsm} touchGroups={this.touchGroups} paths={this.paths} />,
                 container
             );
         }

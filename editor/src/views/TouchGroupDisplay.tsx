@@ -1,14 +1,15 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
+import { TouchGroupInterface, TouchGroupObj } from '../../../interfaces';
 import { SDBClient, SDBDoc, SDBSubDoc } from 'sdb-ts';
-import { TouchGroup, TouchGroupObj } from '../../../interfaces';
+import { clone, isEqual } from 'lodash';
 
 interface TouchGroupProps {
     path: (string|number)[];
     doc: SDBDoc<any>;
 }
-interface TouchGroupState {
+interface TouchGroupState extends TouchGroupInterface {
 }
 
 export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGroupState> {
@@ -20,10 +21,9 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
         maxTouchInterval: null,
         greedy: false
     };
-    private subDoc: SDBSubDoc<TouchGroup>; 
+    private subDoc: SDBSubDoc<TouchGroupInterface>; 
     public constructor(props: TouchGroupProps) {
         super(props);
-        this.state = { };
         this.initialize();
     }
 
@@ -31,43 +31,49 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
         const defaults = TouchGroupDisplay.defaults;
         return (
             <div>
-                <div>numFingers: <Cell text={`${defaults.numFingers}`} onChange={this.onNFChange} /></div>
-                <div>downInside: <Cell text={`${defaults.downInside}`} onChange={this.onDIChange} /></div>
-                <div>downOutside: <Cell text={`${defaults.downOutside}`} onChange={this.onDOChange} /></div>
-                <div>maxRadius: <Cell text={`${defaults.maxRadius}`} onChange={this.onMRChange} /></div>
-                <div>maxTouchInterval: <Cell text={`${defaults.maxTouchInterval}`} onChange={this.onMTIChange} /></div>
-                <div>greedy: <Cell text={`${defaults.greedy}`} onChange={this.onGChange} /></div>
+                <div>numFingers: <Cell text={`${this.state.numFingers}`} onChange={this.onNFChange} /></div>
+                <div>downInside: <Cell text={`${this.state.downInside}`} onChange={this.onDIChange} /></div>
+                <div>downOutside: <Cell text={`${this.state.downOutside}`} onChange={this.onDOChange} /></div>
+                <div>maxRadius: <Cell text={`${this.state.maxRadius}`} onChange={this.onMRChange} /></div>
+                <div>maxTouchInterval: <Cell text={`${this.state.maxTouchInterval}`} onChange={this.onMTIChange}/></div>
+                <div>greedy: <Cell text={`${this.state.greedy}`} onChange={this.onGChange} /></div>
             </div>
         );
     }
 
-    private onNFChange = (event: CellChangeEvent) => {
-        this.props.doc.submitObjectReplaceOp(this.props.path.concat('numFingers'), event.value);
+    private onNFChange = async (event: CellChangeEvent) => {
+        this.subDoc.submitObjectReplaceOp(['numFingers'], event.value);
+        this.setState(this.subDoc.getData());
     }
-    private onDIChange = (event: CellChangeEvent) => {
-        this.props.doc.submitObjectReplaceOp(this.props.path.concat('downInside'), event.value);
+    private onDIChange = async (event: CellChangeEvent) => {
+        this.subDoc.submitObjectReplaceOp(['downInside'], event.value);
+        this.setState(this.subDoc.getData());
     }
-    private onDOChange = (event: CellChangeEvent) => {
-        this.props.doc.submitObjectReplaceOp(this.props.path.concat('downOutside'), event.value);
+    private onDOChange = async (event: CellChangeEvent) => {
+        this.subDoc.submitObjectReplaceOp(['downOutside'], event.value);
+        this.setState(this.subDoc.getData());
     }
-    private onMRChange = (event: CellChangeEvent) => {
-        this.props.doc.submitObjectReplaceOp(this.props.path.concat('maxRadius'), event.value);
+    private onMRChange = async (event: CellChangeEvent) => {
+        this.subDoc.submitObjectReplaceOp(['maxRadius'], event.value);
+        this.setState(this.subDoc.getData());
     }
-    private onMTIChange = (event: CellChangeEvent) => {
-        this.props.doc.submitObjectReplaceOp(this.props.path.concat('maxTouchInterval'), event.value);
+    private onMTIChange = async (event: CellChangeEvent) => {
+        this.subDoc.submitObjectReplaceOp(['maxTouchInterval'], event.value);
+        this.setState(this.subDoc.getData());
     }
-    private onGChange = (event: CellChangeEvent) => {
-        this.props.doc.submitObjectReplaceOp(this.props.path.concat('greedy'), event.value);
+    private onGChange = async (event: CellChangeEvent) => {
+        this.subDoc.submitObjectReplaceOp(['greedy'], event.value);
+        this.setState(this.subDoc.getData());
     }
 
     private async initialize(): Promise<void> {
-        await this.props.doc.fetch();
-        this.subDoc = this.props.doc.subDoc<TouchGroupObj>(this.props.path);
+        this.subDoc = this.props.doc.subDoc<TouchGroupInterface>(this.props.path);
         const data = this.subDoc.getData();
-        if (data) {
-            console.log(data);
+        if (data && !isEqual(data, {})) {
+            this.state = clone(data);
         } else {
-            this.props.doc.submitObjectReplaceOp([], {});
+            this.subDoc.submitObjectReplaceOp([], TouchGroupDisplay.defaults);
+            this.state = TouchGroupDisplay.defaults;
         }
     }
 }

@@ -1,8 +1,9 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
-import { SDBDoc } from 'sdb-ts';
-import { clone } from 'lodash';
+import { SDBDoc, SDBSubDoc } from 'sdb-ts';
+import { PathType, PathInterface } from '../../../interfaces';
+import { clone, isEqual } from 'lodash';
 // import { arrayMove, SortableContainer, SortableElement } from 'react-sortable-hoc';
 
 // const SortableItem = SortableElement(({value}: {value: string}) =>
@@ -18,8 +19,6 @@ import { clone } from 'lodash';
 //     </ul>
 //   );
 // });
-
-type PathType = 'line' | 'circle' | 'rectangle';
 
 type Point = {
     x: number | cjs.Constraint;
@@ -47,21 +46,22 @@ interface PathSpecDisplayProps {
     path: (string|number)[];
     doc: SDBDoc<any>;
 }
-interface PathSpecDisplayState {
-    type: PathType;
-}
+interface PathSpecDisplayState extends PathInterface { }
 
 export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathSpecDisplayState> {
-    private pathConstraints: { [name: string]: cjs.Constraint } = {
-        lsx: null, lsy: null, lex: null, ley: null, ccx: null, ccy: null, ccr: null,
-        rcx: null, rcy: null, rcw: null, rch: null
-    };
+    private static defaults = { type: 'line' as PathType, lsx: '0', lsy: '0', lex: '0', ley: '0' };
+    private subDoc: SDBSubDoc<PathInterface>; 
     public constructor(props: PathSpecDisplayProps) {
         super(props);
-        this.state = {
-            type: 'line'
-        };
-        this.props.doc.submitObjectReplaceOp(this.props.path, clone(this.state));
+        this.subDoc = this.props.doc.subDoc<PathInterface>(this.props.path);
+
+        const data = this.subDoc.getData();
+        if (data && !isEqual(data, {})) {
+            this.state = clone(data);
+        } else {
+            this.subDoc.submitObjectReplaceOp([], PathSpecDisplay.defaults);
+            this.state = clone(PathSpecDisplay.defaults);
+        }
     }
 
     public onCellChange(name: string, event: CellChangeEvent): void {
@@ -93,34 +93,90 @@ export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathS
             parameterControls = (
                 <span>
                     Start: (
-                        <Cell onChange={this.onCellChange.bind(this, 'lsx')} key="lineStartX" placeholder="x" />,
-                        <Cell onChange={this.onCellChange.bind(this, 'lsy')} key="lineStartY" placeholder="y" />),
+                        <Cell
+                            text={`${this.state.lsx}`}
+                            onChange={this.onCellChange.bind(this, 'lsx')}
+                            key="lineStartX"
+                            placeholder="x"
+                        />,
+                        <Cell
+                            text={`${this.state.lsy}`}
+                            onChange={this.onCellChange.bind(this, 'lsy')}
+                            key="lineStartY"
+                            placeholder="y"
+                        />
+                        ),
                     End: (
-                        <Cell onChange={this.onCellChange.bind(this, 'lex')} key="lineEndX" placeholder="x" />,
-                        <Cell onChange={this.onCellChange.bind(this, 'ley')} key="lineEndY" placeholder="y" />)
+                        <Cell
+                            text={`${this.state.lex}`}
+                            onChange={this.onCellChange.bind(this, 'lex')}
+                            key="lineEndX"
+                            placeholder="x"
+                        />,
+                        <Cell
+                            text={`${this.state.ley}`}
+                            onChange={this.onCellChange.bind(this, 'ley')}
+                            key="lineEndY"
+                            placeholder="y"
+                        />)
                 </span>
             );
         } else if (type === 'circle') {
             parameterControls = (
                 <span>
                     Center: (
-                        <Cell onChange={this.onCellChange.bind(this, 'ccx')} key="circleCenterX" placeholder="x" />,
-                        <Cell onChange={this.onCellChange.bind(this, 'ccy')} key="circleCenterY" placeholder="y" />),
+                        <Cell
+                            text={`${this.state.ccx}`}
+                            onChange={this.onCellChange.bind(this, 'ccx')}
+                            key="circleCenterX"
+                            placeholder="x"
+                        />,
+                        <Cell
+                            text={`${this.state.ccy}`}
+                            onChange={this.onCellChange.bind(this, 'ccy')}
+                            key="circleCenterY"
+                            placeholder="y"
+                        />),
                     Radius:
-                        <Cell onChange={this.onCellChange.bind(this, 'ccr')} key="circleRadius" placeholder="r" />
+                        <Cell
+                            text={`${this.state.ccr}`}
+                            onChange={this.onCellChange.bind(this, 'ccr')}
+                            key="circleRadius"
+                            placeholder="r"
+                        />
                 </span>
             );
         } else if (type === 'rectangle') {
             parameterControls = (
                 <span>
                     x:
-                        <Cell onChange={this.onCellChange.bind(this, 'rcx')} key="rectX" placeholder="x" />,
+                        <Cell
+                            text={`${this.state.rcx}`}
+                            onChange={this.onCellChange.bind(this, 'rcx')}
+                            key="rectX"
+                            placeholder="x"
+                        />,
                     y:
-                        <Cell onChange={this.onCellChange.bind(this, 'rcy')} key="rectY" placeholder="y" />,
+                        <Cell
+                            text={`${this.state.rcy}`}
+                            onChange={this.onCellChange.bind(this, 'rcy')}
+                            key="rectY"
+                            placeholder="y"
+                        />,
                     width:
-                        <Cell onChange={this.onCellChange.bind(this, 'rcw')} key="rectWidth" placeholder="width" />,
+                        <Cell
+                            text={`${this.state.rcw}`}
+                            onChange={this.onCellChange.bind(this, 'rcw')}
+                            key="rectWidth"
+                            placeholder="width"
+                        />,
                     height:
-                        <Cell onChange={this.onCellChange.bind(this, 'rch')} key="rectHeight" placeholder="height" />
+                        <Cell
+                            text={`${this.state.rch}`}
+                            onChange={this.onCellChange.bind(this, 'rch')}
+                            key="rectHeight"
+                            placeholder="height"
+                        />
                 </span>
             );
         }

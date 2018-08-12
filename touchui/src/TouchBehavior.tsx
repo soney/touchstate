@@ -1,8 +1,8 @@
 /* tslint:disable:no-string-literal*/
 import * as React from 'react';
 import * as cjs from 'constraintjs';
-import { SDBClient, SDBDoc } from 'sdb-ts';
 import { FSM, SDBBinding } from 't2sm';
+import { SDBClient, SDBDoc, SDBSubDoc } from 'sdb-ts';
 // import { StateData, TransitionData } from '../../editor/src/views/FSMComponent';
 import * as jQuery from 'jquery';
 import './touchscreen/touchscreen_layer';
@@ -11,7 +11,8 @@ import { Path } from './touch_primitives/Path';
 import { TouchCluster } from './touch_primitives/TouchCluster';
 import { TouchClusterBinding } from './bindings/TouchClusterBinding';
 import { PathBinding } from './bindings/PathBinding';
-import { StateData, TransitionData, BehaviorDoc } from '../../interfaces';
+import { StateData, TransitionData, BehaviorDoc, TouchGroupObj, PathObj } from '../../interfaces';
+import { each } from 'lodash';
 
 interface TouchBehaviorProps {
     path: (string|number)[];
@@ -26,6 +27,8 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     private element: HTMLDivElement;
     private renderedPromise: Promise<HTMLDivElement>;
     private resolveRP: Function;
+    private touchGroups: SDBSubDoc<TouchGroupObj>;
+    private paths: SDBSubDoc<PathObj>;
     public constructor(props: TouchBehaviorProps) {
         super(props);
         this.state = { };
@@ -84,14 +87,51 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         doc.subscribe();
         await doc.fetch();
         await this.renderedPromise;
-        this.binding = new SDBBinding(doc, ['fsm']);
-        this.fsm = this.binding.getFSM();
+        this.touchGroups = this.props.doc.subDoc(this.props.path.concat(['touchGroups']));
+        this.paths = this.props.doc.subDoc(this.props.path.concat(['paths']));
+        this.touchGroups.subscribe((eventType, ops) => {
+            if (eventType === 'op') {
+                ops.forEach((op) => {
+                    const {p} = op;
+                    if (p.length === 1 && op.oi) {
+                        const name = p[0];
+                        const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
+                        const c = tcb.getCluster();
+                    }
+                });
+            } else {
+                const touchGroups = this.touchGroups.getData();
+                each(touchGroups, (tg, name) => {
+                    const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
+                    const c = tcb.getCluster();
+                });
+            }
+        });
 
-        const pb = new PathBinding(doc, ['ps']);
-        const path = pb.getPath();
-        this.addPath(path);
-        const tg = new TouchClusterBinding(doc, ['tg']);
-        const c = tg.getCluster();
+        this.paths.subscribe((eventType, ops) => {
+            if (eventType === 'op') {
+                ops.forEach((op) => {
+                    const {p} = op;
+                    if (p.length === 1 && op.oi) {
+                        const name = p[0];
+                        const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
+                        const c = tcb.getCluster();
+                    }
+                });
+            } else {
+                const paths = this.paths.getData();
+                each(paths, (path, name) => {
+                    const pb = new PathBinding(doc, this.props.path.concat(['paths', name]));
+                    const pathObj = pb.getPath();
+                    this.addPath(pathObj);
+                });
+            }
+        });
+        const fsmBinding = new SDBBinding(this.getDoc(), ['fsm']);
+        this.fsm = fsmBinding.getFSM();
+        this.fsm.addEventListener('transitionPayloadChanged', (event) => {
+            console.log(event);
+        });
     }
 
     private getDoc(): SDBDoc<any> {

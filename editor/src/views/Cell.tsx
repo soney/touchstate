@@ -33,7 +33,6 @@ export class Cell extends React.Component<CellProps, CellState> {
             state: ClickState.IDLE
         };
         this.text = this.props.text;
-        this.emitUpdate();
     }
 
     public render(): React.ReactNode {

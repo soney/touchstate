@@ -1,17 +1,19 @@
 import * as React from 'react';
-import { SDBDoc, SDBSubDoc } from 't2sm/node_modules/sdb-ts';
+import { SDBDoc, SDBSubDoc } from 'sdb-ts';
 import { FSMComponent } from './views/FSMComponent';
 import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../interfaces';
 import { TouchGroupDisplay } from './views/TouchGroupDisplay';
 import { PathSpecDisplay } from './views/PathSpecDisplay';
 import { FSM } from 't2sm';
-import { keys } from 'lodash';
+import { keys, map } from 'lodash';
 
 interface EditorProps {
     doc: SDBDoc<any>;
     fsm: FSM<StateData, TransitionData>;
 }
 interface EditorState {
+    touchGroups: TouchGroupObj;
+    paths: PathObj;
 }
 
 export class Editor extends React.Component<EditorProps, EditorState> {
@@ -19,27 +21,55 @@ export class Editor extends React.Component<EditorProps, EditorState> {
     private paths: SDBSubDoc<PathObj>;
     public constructor(props: EditorProps) {
         super(props);
-        this.state = {
-        };
+
         this.touchGroups = this.props.doc.subDoc(['touchGroups']);
         this.paths = this.props.doc.subDoc(['paths']);
+
         this.touchGroups.subscribe(() => {
-            console.log(this.touchGroups.getData());
+            this.setState({ touchGroups: this.touchGroups.getData() });
         });
         this.paths.subscribe(() => {
-            console.log(this.paths.getData());
+            this.setState({ paths: this.paths.getData() });
         });
+        this.state = {
+            touchGroups: this.touchGroups.getData(),
+            paths: this.paths.getData()
+        };
     }
 
     public render(): React.ReactNode {
         const { doc, fsm } = this.props;
+        const touchGroupDisplays: React.ReactNode[] = map(this.state.touchGroups, (tg, name) => {
+            return (
+                <div key={name}>
+                    {name}:
+                    <TouchGroupDisplay doc={doc} path={['touchGroups', name]} />
+                </div>
+            );
+        });
+        const pathDisplays: React.ReactNode[] = map(this.state.paths, (p, name) => {
+            return (
+                <div key={name}>
+                    {name}:
+                    <PathSpecDisplay doc={doc} path={['paths', name]} />
+                </div>
+            );
+        });
         return (
             <div>
                 <FSMComponent doc={doc} path={['fsm']} fsm={fsm} />
-                <button onClick={this.addTouchGroup}>Add Touch Group</button>
-                <button onClick={this.addPath}>Add Path</button>
-                {/* <TouchGroupDisplay doc={doc} path={['tg']} /> */}
-                {/* <PathSpecDisplay doc={doc} path={['ps']} /> */}
+                <div className="touchGroups">
+                    <div>
+                        {touchGroupDisplays}
+                    </div>
+                    <button onClick={this.addTouchGroup}>Add Touch Group</button>
+                </div>
+                <div className="paths">
+                    <div>
+                        {pathDisplays}
+                    </div>
+                    <button onClick={this.addPath}>Add Path</button>
+                </div>
             </div>
         );
     }

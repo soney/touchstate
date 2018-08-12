@@ -1,10 +1,14 @@
 import * as React from 'react';
 import { ForeignObjectDisplay, FSM } from 't2sm';
-import { StateData, TransitionData } from '../../../interfaces';
+import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../../interfaces';
+import { SDBSubDoc } from 'sdb-ts';
+import { extend, map } from 'lodash';
 
 interface TransitionContentsProps {
     fod: ForeignObjectDisplay;
     fsm: FSM<StateData, TransitionData>;
+    touchGroups: SDBSubDoc<TouchGroupObj>;
+    paths: SDBSubDoc<PathObj>;
 }
 interface TransitionContentsState {
     type: string;
@@ -12,6 +16,8 @@ interface TransitionContentsState {
     selectedTouchGroup?: string;
     selectedPath?: string;
     touchEventType?: string;
+    paths: PathObj;
+    touchGroups: TouchGroupObj;
 }
 
 export class TransitionContents extends React.Component<TransitionContentsProps, TransitionContentsState> {
@@ -20,13 +26,26 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         const payload = this.props.fsm.getTransitionPayload(this.props.fod.getName());
 
         if (payload) {
-            this.state = payload;
+            this.state = extend({
+                                    paths: this.props.paths.getData(),
+                                    touchGroups: this.props.touchGroups.getData() },
+                                payload);
         } else {
             this.state = {
                 type: 'none',
-                timeoutDelay: 1000
+                timeoutDelay: 1000,
+                paths: this.props.paths.getData(),
+                touchGroups: this.props.touchGroups.getData()
             };
         }
+        this.props.paths.subscribe(() => {
+            this.setState({ paths: this.props.paths.getData() });
+        });
+        this.props.touchGroups.subscribe(() => {
+            this.setState({ touchGroups: this.props.touchGroups.getData() });
+        });
+        const { fod } = this.props;
+        fod.setDimensions(100, 1900);
     }
 
     public render(): React.ReactNode {
@@ -38,13 +57,20 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
             typeDetails = <input type="number" value={this.state.timeoutDelay} onChange={this.onTimeoutChange} />;
         } else if (type === 'touchgroup') {
             let pathSelection: React.ReactNode;
+            const touchOptions: React.ReactNode[] = map(this.state.touchGroups, (tg, name) => {
+                return <option key={name} value={name}>{name}</option>;
+            });
 
             if (this.state.touchEventType === 'cross') {
+                const pathOptions: React.ReactNode[] = map(this.state.paths, (p, name) => {
+                    return <option key={name} value={name}>{name}</option>;
+                });
                 pathSelection = (
                     <span>
                         <label>Path:</label>
                         <select value={this.state.touchEventType} onChange={this.handlePathChange}>
                             <option value="none">(none)</option>
+                            {pathOptions}
                         </select>
                     </span>
                 );
@@ -55,6 +81,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
                     <label>Touch:</label>
                     <select value={this.state.selectedTouchGroup} onChange={this.handleTouchGroupChange}>
                         <option value="none">(none)</option>
+                        {touchOptions}
                     </select>
                     <label>Type:</label>
                     <select value={this.state.touchEventType} onChange={this.handleTouchEventChange}>
