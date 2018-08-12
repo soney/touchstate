@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ForeignObjectDisplay, FSM } from 't2sm';
-import { StateData, TransitionData } from './FSMComponent';
+import { StateData, TransitionData } from '../../../interfaces';
 
 interface TransitionContentsProps {
     fod: ForeignObjectDisplay;

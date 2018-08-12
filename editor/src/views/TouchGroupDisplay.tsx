@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
-import { SDBClient, SDBDoc } from 'sdb-ts';
+import { SDBClient, SDBDoc, SDBSubDoc } from 'sdb-ts';
+import { TouchGroup, TouchGroupObj } from '../../../interfaces';
 
 interface TouchGroupProps {
     path: (string|number)[];
@@ -19,6 +20,7 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
         maxTouchInterval: null,
         greedy: false
     };
+    private subDoc: SDBSubDoc<TouchGroup>; 
     public constructor(props: TouchGroupProps) {
         super(props);
         this.state = { };
@@ -60,11 +62,12 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
 
     private async initialize(): Promise<void> {
         await this.props.doc.fetch();
-        const data = this.props.doc.traverse(this.props.path);
+        this.subDoc = this.props.doc.subDoc<TouchGroupObj>(this.props.path);
+        const data = this.subDoc.getData();
         if (data) {
             console.log(data);
         } else {
-            this.props.doc.submitObjectReplaceOp(this.props.path, {});
+            this.props.doc.submitObjectReplaceOp([], {});
         }
     }
 }

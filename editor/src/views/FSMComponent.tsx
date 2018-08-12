@@ -5,6 +5,7 @@ import { SDBDoc } from 'sdb-ts';
 import { DISPLAY_TYPE } from 't2sm/built/views/StateMachineDisplay';
 import * as ReactDOM from 'react-dom';
 import { TransitionContents } from './TransitionContents';
+import { StateData, TransitionData } from '../../../interfaces';
 
 interface StateMachineDisplayProps {
     fsm: FSM<StateData, TransitionData>;
@@ -15,18 +16,6 @@ interface StateMachineDisplayState {
 }
 
 export enum TransitionType { START, TIMEOUT, TOUCH_GROUP }
-
-export interface StateData {
-
-}
-
-export interface TransitionData {
-    type: string;
-    timeoutDelay?: number;
-    selectedTouchGroup?: string;
-    selectedPath?: string;
-    touchEventType?: string;
-}
 
 export class FSMComponent extends React.Component<StateMachineDisplayProps, StateMachineDisplayState> {
     private stateMachineDisplay: StateMachineDisplay;

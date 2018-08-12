@@ -11,17 +11,18 @@ import { Path } from './touch_primitives/Path';
 import { TouchCluster } from './touch_primitives/TouchCluster';
 import { TouchClusterBinding } from './bindings/TouchClusterBinding';
 import { PathBinding } from './bindings/PathBinding';
+import { StateData, TransitionData, BehaviorDoc } from '../../interfaces';
 
 interface TouchBehaviorProps {
     path: (string|number)[];
-    doc: SDBDoc<any>;
+    doc: SDBDoc<BehaviorDoc>;
 }
 interface TouchBehaviorState {
 }
 
 export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBehaviorState> {
     private binding: SDBBinding;
-    private fsm: FSM<any, any>;
+    private fsm: FSM<StateData, TransitionData>;
     private element: HTMLDivElement;
     private renderedPromise: Promise<HTMLDivElement>;
     private resolveRP: Function;
