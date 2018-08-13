@@ -90,6 +90,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         this.touchGroups = this.props.doc.subDoc(this.props.path.concat(['touchGroups']));
         this.paths = this.props.doc.subDoc(this.props.path.concat(['paths']));
         this.touchGroups.subscribe((eventType, ops) => {
+            console.log(eventType);
             if (eventType === 'op') {
                 ops.forEach((op) => {
                     const {p} = op;
@@ -111,11 +112,13 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         this.paths.subscribe((eventType, ops) => {
             if (eventType === 'op') {
                 ops.forEach((op) => {
+                    console.log(op);
                     const {p} = op;
                     if (p.length === 1 && op.oi) {
                         const name = p[0];
-                        const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
-                        const c = tcb.getCluster();
+                        const pb = new PathBinding(doc, this.props.path.concat(['paths', name]));
+                        const pathObj = pb.getPath();
+                        this.addPath(pathObj);
                     }
                 });
             } else {
@@ -157,11 +160,16 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     setTimeout(() => { this.fsm.fireTransition(transitionName); }, payload.timeoutdelay);
                 }
             };
+            if (this.fsm.getActiveState() === fromState) {
+                setTimeout(() => { this.fsm.fireTransition(transitionName); }, payload.timeoutdelay);
+            }
             this.fsm.addListener('activeStateChanged', activeStateChangedListener);
             return () => {
                 this.fsm.removeListener('activeStateChanged', activeStateChangedListener);
             };
         } else if (type === 'touch') {
+            console.log(payload);
+        } else {
             console.log(payload);
         }
     }

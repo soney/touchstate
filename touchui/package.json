@@ -34,10 +34,10 @@
     "react-contextmenu": "^2.9.2",
     "react-dom": "^16.4.1",
     "react-sortable-hoc": "^0.8.3",
-    "sdb-ts": "git+https://github.com/soney/sdb-ts.git",
+    "sdb-ts": "file:../../sdb-ts",
     "svg.js": "^2.6.5",
     "svg.pathmorphing.js": "^0.1.3",
-    "t2sm": "git+https://github.com/soney/t2sm.git"
+    "t2sm": "file:../../t2sm"
   },
   "devDependencies": {
     "react-scripts-ts": "^2.16.0",

@@ -45,7 +45,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
             this.setState({ touchGroups: this.props.touchGroups.getData() });
         });
         const { fod } = this.props;
-        fod.setDimensions(100, 1900);
+        fod.setDimensions(100, 170);
     }
 
     public render(): React.ReactNode {
