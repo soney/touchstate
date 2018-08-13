@@ -43,6 +43,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             return (
                 <div key={name}>
                     {name}:
+                    <button onClick={this.removeTouchGroup.bind(this, name)}>Remove</button>
                     <TouchGroupDisplay doc={doc} path={['touchGroups', name]} />
                 </div>
             );
@@ -51,6 +52,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             return (
                 <div key={name}>
                     {name}:
+                    <button onClick={this.removePath.bind(this, name)}>Remove</button>
                     <PathSpecDisplay doc={doc} path={['paths', name]} />
                 </div>
             );
@@ -96,4 +98,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         this.paths.submitObjectInsertOp([pName], {});
     }
 
+    private removePath(name: string): void {
+        this.paths.submitObjectDeleteOp([name]);
+    }
+
+    private removeTouchGroup(name: string): void {
+        this.touchGroups.submitObjectDeleteOp([name]);
+    }
 }

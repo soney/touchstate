@@ -494,14 +494,22 @@ export class TouchCluster extends EventEmitter {
 	public addCrossListener(path:Path, callback:Function):this {
 		const crossEvent = new CrossEvent({
 			cluster: this,
-			path
+			path,
+			callback
 		});
 		this.crossEvents.push(crossEvent);
-
-		crossEvent.on('cross', (e) => {
-			//this._emit('cross', e);
-			callback(e);
-		});
+		return this;
+	};
+	public removeCrossListener(path:Path, callback:Function):this {
+		let i: number = 0;
+		while(i < this.crossEvents.length) {
+			const crossEvent = this.crossEvents[i];
+			if(crossEvent.getCallback() === callback && crossEvent.getPath() === path) {
+				crossEvent.destroy();
+				this.crossEvents.splice(i, 1);
+				i--;
+			}
+		}
 		return this;
 	};
 	public destroy(silent:boolean):void {

@@ -10,6 +10,7 @@ export interface CrossEventOptions {
 	cluster?: TouchCluster;
 	minVelocity?: number;
 	maxVelocity?: number;
+	callback?: Function;
 }
 
 export class CrossEvent extends EventEmitter {
@@ -44,6 +45,13 @@ export class CrossEvent extends EventEmitter {
 	};
 	private _onCross = (event:CrossEvent):void => {
 		this.emit('cross', event);
+		const callback = this.getCallback();
+		if(callback) {
+			callback(event);
+		}
+	};
+	public getCallback(): Function {
+		return this.options.callback;
 	};
 };
 // function CrossEvent(options) {

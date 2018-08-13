@@ -49,7 +49,7 @@ interface PathSpecDisplayProps {
 interface PathSpecDisplayState extends PathInterface { }
 
 export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathSpecDisplayState> {
-    private static defaults = { type: 'line' as PathType, lsx: '0', lsy: '0', lex: '0', ley: '0' };
+    private static defaults = { type: 'line' as PathType, lsx: '0', lsy: '0', lex: '999', ley: '999' };
     private subDoc: SDBSubDoc<PathInterface>; 
     public constructor(props: PathSpecDisplayProps) {
         super(props);

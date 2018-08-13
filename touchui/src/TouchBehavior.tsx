@@ -23,12 +23,15 @@ interface TouchBehaviorState {
 
 export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBehaviorState> {
     private binding: SDBBinding;
+    private transitionListeners: Map<string, Function> = new Map();
     private fsm: FSM<StateData, TransitionData>;
     private element: HTMLDivElement;
     private renderedPromise: Promise<HTMLDivElement>;
     private resolveRP: Function;
     private touchGroups: SDBSubDoc<TouchGroupObj>;
     private paths: SDBSubDoc<PathObj>;
+    private pathMap: Map<string, Path> = new Map();
+    private touchGroupMap: Map<string, TouchCluster> = new Map();
     public constructor(props: TouchBehaviorProps) {
         super(props);
         this.state = { };
@@ -90,7 +93,6 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         this.touchGroups = this.props.doc.subDoc(this.props.path.concat(['touchGroups']));
         this.paths = this.props.doc.subDoc(this.props.path.concat(['paths']));
         this.touchGroups.subscribe((eventType, ops) => {
-            console.log(eventType);
             if (eventType === 'op') {
                 ops.forEach((op) => {
                     const {p} = op;
@@ -98,6 +100,14 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                         const name = p[0];
                         const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
                         const c = tcb.getCluster();
+                        this.touchGroupMap.set(name, c);
+                    } else if (p.length === 1 && op.od) {
+                        const name = p[0];
+                        const touchGroup = this.touchGroupMap.get(name);
+                        if (touchGroup) {
+                            touchGroup.destroy(true);
+                            this.removeTouchCluster(touchGroup);
+                        }
                     }
                 });
             } else {
@@ -105,6 +115,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 each(touchGroups, (tg, name) => {
                     const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
                     const c = tcb.getCluster();
+                    this.touchGroupMap.set(name, c);
                 });
             }
         });
@@ -112,13 +123,21 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         this.paths.subscribe((eventType, ops) => {
             if (eventType === 'op') {
                 ops.forEach((op) => {
-                    console.log(op);
                     const {p} = op;
                     if (p.length === 1 && op.oi) {
                         const name = p[0];
                         const pb = new PathBinding(doc, this.props.path.concat(['paths', name]));
                         const pathObj = pb.getPath();
                         this.addPath(pathObj);
+                        this.pathMap.set(name, pathObj);
+                    } else if (p.length === 1 && op.od) {
+                        const name = p[0];
+                        const pathObj = this.pathMap.get(name);
+                        if (pathObj) {
+                            this.removePath(pathObj);
+                            pathObj.destroy();
+                            this.pathMap.delete(name);
+                        }
                     }
                 });
             } else {
@@ -127,50 +146,123 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     const pb = new PathBinding(doc, this.props.path.concat(['paths', name]));
                     const pathObj = pb.getPath();
                     this.addPath(pathObj);
+                    this.pathMap.set(name, pathObj);
                 });
             }
         });
         const fsmBinding = new SDBBinding(this.getDoc(), ['fsm']);
         this.fsm = fsmBinding.getFSM();
+        window['fsm' + ''] = this.fsm;
         each(this.fsm.getTransitions(), (transition) => {
-            this.getEventListener(transition);
+            this.updateEventListener(transition);
         });
         this.fsm.addListener('transitionPayloadChanged', (event) => {
             const { transition } = event;
-            this.getEventListener(transition);
+            this.updateEventListener(transition);
         });
         this.fsm.addListener('transitionAdded', (event) => {
             const { transition } = event;
-            this.getEventListener(transition);
+            this.updateEventListener(transition);
         });
+        this.fsm.addListener('transitionRemoved', (event) => {
+            const { transition } = event;
+            this.updateEventListener(transition);
+        });
+    }
+    private updateEventListener(transition: string): void {
+        if (this.transitionListeners.has(transition)) {
+            const removeTransitionListener = this.transitionListeners.get(transition);
+            removeTransitionListener();
+        }
+
+        if (this.fsm.hasTransition(transition)) {
+            const removeTransition = this.getEventListener(transition);
+            this.transitionListeners.set(transition, removeTransition);
+        }
     }
 
     private getDoc(): SDBDoc<any> {
         return this.props.doc;
     }
 
-    private getEventListener(transitionName: string) {
+    private getEventListener(transitionName: string): Function {
         const payload = this.fsm.getTransitionPayload(transitionName);
         const { type } = payload;
         if (type === 'timeout') {
+            const { timeoutDelay } = payload;
             const fromState = this.fsm.getTransitionFrom(transitionName);
+            let timeoutID;
+            let removeListener: Function;
             const activeStateChangedListener = (event) => {
                 const { state } = event;
+                if (timeoutID) { clearTimeout(timeoutID); }
                 if (state === fromState) {
-                    setTimeout(() => { this.fsm.fireTransition(transitionName); }, payload.timeoutdelay);
+                    timeoutID = setTimeout(() => {
+                                    console.log('fire');
+                                    this.fsm.fireTransition(transitionName);
+                                }, timeoutDelay);
                 }
             };
+            const transitionFromChangedListener = (event) => {
+                const { transition } = event;
+                if (transition === transitionName) {
+                    removeListener();
+                }
+            };
+            removeListener = () => {
+                if (timeoutID) { clearTimeout(timeoutID); }
+                this.fsm.removeListener('activeStateChanged', activeStateChangedListener);
+                this.fsm.removeListener('transitionFromChanged', transitionFromChangedListener);
+            };
             if (this.fsm.getActiveState() === fromState) {
-                setTimeout(() => { this.fsm.fireTransition(transitionName); }, payload.timeoutdelay);
+                timeoutID = setTimeout(() => {
+                            console.log('fire');
+                            this.fsm.fireTransition(transitionName);
+                        }, timeoutDelay);
             }
             this.fsm.addListener('activeStateChanged', activeStateChangedListener);
-            return () => {
-                this.fsm.removeListener('activeStateChanged', activeStateChangedListener);
-            };
+            this.fsm.addListener('transitionFromChanged', transitionFromChangedListener);
+
+            return removeListener;
         } else if (type === 'touch') {
+            const { touchEventType, selectedTouchGroup } = payload;
+            const touchGroup = this.touchGroupMap.get(selectedTouchGroup);
+
+            if (touchEventType === 'start') {
+                const onSatisfied = () => {
+                    this.fsm.fireTransition(transitionName);
+                };
+                touchGroup.addListener('satisfied', onSatisfied);
+                const removeListener = () => {
+                    touchGroup.removeListener('satisfied', onSatisfied);
+                };
+                return removeListener;
+            } else if (touchEventType === 'end') {
+                const onUnsatisfied = () => {
+                    this.fsm.fireTransition(transitionName);
+                };
+                touchGroup.addListener('unsatisfied', onUnsatisfied);
+                const removeListener = () => {
+                    touchGroup.removeListener('unsatisfied', onUnsatisfied);
+                };
+                return removeListener;
+            } else if (touchEventType === 'cross') {
+                const { selectedPath } = payload;
+                const path = this.pathMap.get(selectedPath);
+                const onCross = () => {
+                    this.fsm.fireTransition(transitionName);
+                };
+                touchGroup.addCrossListener(path, onCross);
+                const removeListener = () => {
+                    touchGroup.removeCrossListener(path, onCross);
+                };
+                return removeListener;
+            }
             console.log(payload);
+            return () => null;
         } else {
             console.log(payload);
+            return () => null;
         }
     }
 }

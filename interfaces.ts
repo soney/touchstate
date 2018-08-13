@@ -36,8 +36,8 @@ export interface StateData {
 
 export interface TransitionData {
     type: string;
-    timeoutdelay?: number;
-    selectedtouchgroup?: string;
-    selectedpath?: string;
-    toucheventtype?: string;
+    timeoutDelay?: number;
+    selectedTouchGroup?: string;
+    selectedPath?: string;
+    touchEventType?: string;
 }

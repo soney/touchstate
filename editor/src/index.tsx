@@ -11,6 +11,7 @@ import { BehaviorDoc, StateData, TransitionData } from '../../interfaces';
 const fsm: FSM<StateData, TransitionData> = new FSM();
 const client: SDBClient = new SDBClient(new WebSocket(`ws://${window.location.hostname}:3000`));
 const doc: SDBDoc<BehaviorDoc> = client.get('touchdoc', 'touchdoc');
+window['fsm' + ''] = fsm;
 
 (async (): Promise<void> => {
     doc.subscribe();
