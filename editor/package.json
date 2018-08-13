@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx react-scripts-ts start",
+    "start": "export PORT=3001;npx react-scripts-ts start",
     "build": "npx react-scripts-ts build",
     "test": "npx react-scripts-ts test --env=jsdom",
     "eject": "npx react-scripts-ts eject"

@@ -14,7 +14,6 @@ const doc: SDBDoc<BehaviorDoc> = client.get('touchdoc', 'touchdoc');
 (async (): Promise<void> => {
     doc.subscribe();
     await doc.fetch();
-
 })();
 ReactDOM.render(
     <div className="container">

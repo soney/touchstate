@@ -129,12 +129,40 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         });
         const fsmBinding = new SDBBinding(this.getDoc(), ['fsm']);
         this.fsm = fsmBinding.getFSM();
-        this.fsm.addEventListener('transitionPayloadChanged', (event) => {
-            console.log(event);
+        each(this.fsm.getTransitions(), (transition) => {
+            this.getEventListener(transition);
+        });
+        this.fsm.addListener('transitionPayloadChanged', (event) => {
+            const { transition } = event;
+            this.getEventListener(transition);
+        });
+        this.fsm.addListener('transitionAdded', (event) => {
+            const { transition } = event;
+            this.getEventListener(transition);
         });
     }
 
     private getDoc(): SDBDoc<any> {
         return this.props.doc;
+    }
+
+    private getEventListener(transitionName: string) {
+        const payload = this.fsm.getTransitionPayload(transitionName);
+        const { type } = payload;
+        if (type === 'timeout') {
+            const fromState = this.fsm.getTransitionFrom(transitionName);
+            const activeStateChangedListener = (event) => {
+                const { state } = event;
+                if (state === fromState) {
+                    setTimeout(() => { this.fsm.fireTransition(transitionName); }, payload.timeoutdelay);
+                }
+            };
+            this.fsm.addListener('activeStateChanged', activeStateChangedListener);
+            return () => {
+                this.fsm.removeListener('activeStateChanged', activeStateChangedListener);
+            };
+        } else if (type === 'touch') {
+            console.log(payload);
+        }
     }
 }
