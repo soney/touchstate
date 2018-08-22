@@ -2,7 +2,7 @@ import * as React from 'react';
 import { ForeignObjectDisplay, FSM } from 't2sm';
 import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../../interfaces';
 import { SDBSubDoc } from 'sdb-ts';
-import { extend, map } from 'lodash';
+import { extend, map, omitBy } from 'lodash';
 
 interface TransitionContentsProps {
     fod: ForeignObjectDisplay;
@@ -109,7 +109,8 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
 
     public componentDidUpdate(prevProps: any, nextProps: any, snapshot: any): void {
         // super.componentDidUpdate(prevProps, nextProps, snapshot);
-        this.props.fsm.setTransitionPayload(this.props.fod.getName(), this.state);
+        const obj = extend({}, this.state, { 'paths': undefined, 'touchGroups': undefined });
+        this.props.fsm.setTransitionPayload(this.props.fod.getName(), obj);
     }
 
     private onTimeoutChange = (event: React.FormEvent<HTMLInputElement>): void => {
