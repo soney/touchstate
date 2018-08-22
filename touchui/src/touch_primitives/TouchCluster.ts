@@ -501,8 +501,7 @@ export class TouchCluster extends EventEmitter {
 		return this;
 	};
 	public removeCrossListener(path:Path, callback:Function):this {
-		let i: number = 0;
-		while(i < this.crossEvents.length) {
+		for(let i: number = 0; i < this.crossEvents.length; i++) {
 			const crossEvent = this.crossEvents[i];
 			if(crossEvent.getCallback() === callback && crossEvent.getPath() === path) {
 				crossEvent.destroy();

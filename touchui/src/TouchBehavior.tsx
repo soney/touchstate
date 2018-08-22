@@ -12,7 +12,7 @@ import { TouchCluster } from './touch_primitives/TouchCluster';
 import { TouchClusterBinding } from './bindings/TouchClusterBinding';
 import { PathBinding } from './bindings/PathBinding';
 import { StateData, TransitionData, BehaviorDoc, TouchGroupObj, PathObj } from '../../interfaces';
-import { each } from 'lodash';
+import { each, difference } from 'lodash';
 
 interface TouchBehaviorProps {
     path: (string|number)[];
@@ -32,6 +32,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     private paths: SDBSubDoc<PathObj>;
     private pathMap: Map<string, Path> = new Map();
     private touchGroupMap: Map<string, TouchCluster> = new Map();
+    private liveUpdaterMap: Map<string, {pause: Function, resume: Function, run: Function}> = new Map();
     public constructor(props: TouchBehaviorProps) {
         super(props);
         this.state = { };
@@ -125,7 +126,8 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     updatedTouchGroupNames.push(name);
                 });
             }
-            this.updateListeners(updatedTouchGroupNames);
+            this.updateRelevantTransitionEvents(updatedTouchGroupNames);
+            this.updateTouchDisplayListeners();
         });
 
         this.paths.subscribe((eventType, ops) => {
@@ -161,7 +163,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     updatedPathNames.push(name);
                 });
             }
-            this.updateListeners(updatedPathNames);
+            this.updateRelevantTransitionEvents(updatedPathNames);
         });
         window['fsm' + ''] = this.fsm;
         each(this.fsm.getTransitions(), (transition) => {
@@ -181,7 +183,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         });
     }
 
-    private updateListeners(relatedNames: string[]): void {
+    private updateRelevantTransitionEvents(relatedNames: string[]): void {
         const transitions = this.fsm.getTransitions();
         transitions.forEach((transition) => {
             const payload = this.fsm.getTransitionPayload(transition);
@@ -228,7 +230,6 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 if (timeoutID) { clearTimeout(timeoutID); }
                 if (state === fromState) {
                     timeoutID = setTimeout(() => {
-                                    console.log('fire');
                                     this.fsm.fireTransition(transitionName);
                                 }, timeoutDelay);
                 }
@@ -293,11 +294,39 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 }
             }
             return () => null;
-        } else if (type === undefined) {
+        } else if (type === 'none' || type === undefined) {
             return () => null;
         } else {
             console.log(payload);
             return () => null;
         }
+    }
+    private updateTouchDisplayListeners(): void {
+        const touchGroups = Array.from(this.touchGroupMap.keys());
+        const liveUpdaters = Array.from(this.liveUpdaterMap.keys());
+        const touchClusters = touchGroups.map((tg) => this.touchGroupMap.get(tg));
+        const toAdd = difference(touchGroups, liveUpdaters);
+        const toRemove = difference(liveUpdaters, touchGroups);
+
+        toAdd.forEach((name) => {
+            const touchGroup = this.touchGroupMap.get(name);
+            const liveFn = cjs.liven(() => {
+                const props = ['$center', '$endCenter'];
+                props.forEach((prop) => {
+                    const p = [name, prop];
+                    const val = cjs.get(touchGroup[prop]);
+                    console.log(val);
+                    if (val !== this.touchGroups.traverse(p)) {
+                        this.touchGroups.submitObjectReplaceOp(p, val);
+                    }
+                });
+            });
+            this.liveUpdaterMap.set(name, liveFn);
+        });
+        toRemove.forEach((name) => {
+            const liveFn = this.liveUpdaterMap.get(name);
+            liveFn.pause();
+            this.liveUpdaterMap.delete(name);
+        });
     }
 }

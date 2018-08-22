@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { ForeignObjectDisplay, FSM } from 't2sm';
+import { FSM } from 't2sm';
+import { ForeignObjectDisplay } from 't2sm/built/views/ForeignObjectDisplay';
 import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../../interfaces';
 import { SDBSubDoc } from 'sdb-ts';
 import { extend, map, omitBy } from 'lodash';
@@ -68,7 +69,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
                 pathSelection = (
                     <span>
                         <label>Path:</label>
-                        <select value={this.state.touchEventType} onChange={this.handlePathChange}>
+                        <select value={this.state.selectedPath} onChange={this.handlePathChange}>
                             <option value="none">(none)</option>
                             {pathOptions}
                         </select>

@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { FSM, StateMachineDisplay, ForeignObjectDisplay, SDBBinding } from 't2sm';
+import { FSM, SDBBinding } from 't2sm';
+import { StateMachineDisplay } from 't2sm/built/views/StateMachineDisplay';
+import { ForeignObjectDisplay } from 't2sm/built/views/ForeignObjectDisplay';
 import { first, tail } from 'lodash';
 import { SDBDoc, SDBSubDoc } from 'sdb-ts';
 import { DISPLAY_TYPE } from 't2sm/built/views/StateMachineDisplay';
