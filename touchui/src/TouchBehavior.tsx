@@ -224,7 +224,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             this.fsm.addListener('transitionFromChanged', transitionFromChangedListener);
 
             return removeListener;
-        } else if (type === 'touch') {
+        } else if (type === 'touchgroup') {
             const { touchEventType, selectedTouchGroup } = payload;
             const touchGroup = this.touchGroupMap.get(selectedTouchGroup);
 

@@ -58,14 +58,14 @@ $.widget("interstate.screen_touches", {
                 }
 
                 each(event.changedTouches, (touch) => {
-                    var id = touch.identifier,
+                    const id = touch.identifier,
                         x = touch.pageX,
                         y = touch.pageY,
                         fill = defaultFill,
                         stroke = defaultStroke;
 
                     touchDisplays[id] = {
-                        circle: paper.circle(5*this.option("radius")/4).move(x, y).attr({
+                        circle: paper.circle(5*this.option("radius")/4).center(x, y).attr({
                                 opacity: 0.2,
                                 fill: fill,
                                 stroke: stroke,
@@ -107,9 +107,9 @@ $.widget("interstate.screen_touches", {
                     this._updateColor(id);
                 });
             }, this)).on('touchmove.simple_touch_view', bind(function(jq_event) {
-                var event = jq_event.originalEvent;
+                const event = jq_event.originalEvent;
                 each(event.changedTouches, (touch) => {
-                    var id = touch.identifier,
+                    const id = touch.identifier,
                         x = touch.pageX,
                         y = touch.pageY,
                         touchDisplay = touchDisplays[id],
@@ -126,7 +126,7 @@ $.widget("interstate.screen_touches", {
             }, this)).on('touchend.simple_touch_view touchcancel.simple_touch_view', bind(function(jq_event) {
                 var event = jq_event.originalEvent;
                 each(event.changedTouches, (touch) => {
-                    var id = touch.identifier,
+                    const id = touch.identifier,
                         x = touch.pageX,
                         y = touch.pageY,
                         touchDisplay = touchDisplays[id],
@@ -145,12 +145,11 @@ $.widget("interstate.screen_touches", {
                         animPath.attr("path", pathDisplay.attr("path"));
                     }
 
-                    var animation_duration = Math.min(Math.max(200, length/3), 900),
+                    const animation_duration = Math.min(Math.max(200, length/3), 900),
                         startTime = (new Date()).getTime(),
                         endTime = startTime + animation_duration,
                         nearStart = pathDisplay.pointAt(Math.min(5, 0.01*length)),
-                        nearEnd = pathDisplay.pointAt(Math.max(length-5, 0.99*length)),
-                        pct;
+                        nearEnd = pathDisplay.pointAt(Math.max(length-5, 0.99*length));
 
                     animPath.attr({
                         "stroke-width": pathDisplay.attr("stroke-width"),

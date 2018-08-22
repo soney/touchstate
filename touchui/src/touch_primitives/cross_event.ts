@@ -35,7 +35,6 @@ export class CrossEvent extends EventEmitter {
 	};
 	public destroy() {
 		removeCrossingPathListener(this.getPath());
-		this.liveFn.destroy();
 	};
 	public getCluster():TouchCluster {
 		return this.options.cluster;
