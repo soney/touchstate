@@ -5,9 +5,10 @@ import { some, debounce } from 'lodash';
 
 export class PathBinding {
     private pathObj: Path = new Path();
-    private context: any = {};
     private dUpdatePath: Function = debounce(this.updatePath.bind(this), 10);
-    public constructor(private doc: SDBDoc<any>, private path: (number | string)[]) {
+    public constructor(private doc: SDBDoc<any>,
+        private path: (number | string)[],
+        private context: cjs.MapConstraint) {
         this.initialize();
     }
     public getPath(): Path {

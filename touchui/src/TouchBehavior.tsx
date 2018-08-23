@@ -12,7 +12,8 @@ import { TouchCluster } from './touch_primitives/TouchCluster';
 import { TouchClusterBinding } from './bindings/TouchClusterBinding';
 import { PathBinding } from './bindings/PathBinding';
 import { StateData, TransitionData, BehaviorDoc, TouchGroupObj, PathObj } from '../../interfaces';
-import { each, difference } from 'lodash';
+import { each, difference, debounce } from 'lodash';
+import { MapConstraint } from 'constraintjs';
 
 interface TouchBehaviorProps {
     path: (string|number)[];
@@ -32,7 +33,17 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     private paths: SDBSubDoc<PathObj>;
     private pathMap: Map<string, Path> = new Map();
     private touchGroupMap: Map<string, TouchCluster> = new Map();
-    private liveUpdaterMap: Map<string, {pause: Function, resume: Function, run: Function}> = new Map();
+    private liveUpdaterMap: Map<string, {pause: Function, resume: Function,
+        run: Function, destroy: Function}> = new Map();
+    private cellContext: cjs.MapConstraint = new cjs.MapConstraint();
+    private debouncedPropertyUpdate = debounce((name: string, values: { [key: string]: any }) => {
+        each(values, (value: any, prop: string) => {
+            const p = [name, prop];
+            if (value !== this.touchGroups.traverse(p)) {
+                this.touchGroups.submitObjectReplaceOp(p, value);
+            }
+        });
+    }, 20);
     public constructor(props: TouchBehaviorProps) {
         super(props);
         this.state = { };
@@ -86,6 +97,21 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         }
     }
 
+    private addTouchGroupConstraint(touchCluster: TouchCluster, name: string) {
+        const mapConstraint = new MapConstraint();
+        mapConstraint.put('x', touchCluster.getXConstraint());
+        mapConstraint.put('y', touchCluster.getYConstraint());
+        mapConstraint.put('startX', touchCluster.getStartXConstraint());
+        mapConstraint.put('startY', touchCluster.getStartYConstraint());
+        mapConstraint.put('endX', touchCluster.getEndXConstraint());
+        mapConstraint.put('endY', touchCluster.getEndYConstraint());
+        this.cellContext.put(name, mapConstraint);
+    }
+
+    private removeTouchGroupConstraint(name: string) {
+        this.cellContext.remove(name);
+    }
+
     private async initialize(): Promise<void> {
         const doc = this.getDoc();
         doc.subscribe();
@@ -107,6 +133,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                         const c = tcb.getCluster();
                         this.touchGroupMap.set(name, c);
                         updatedTouchGroupNames.push(name);
+                        this.addTouchGroupConstraint(c, name);
                     } else if (p.length === 1 && op.od) {
                         const name = p[0];
                         const touchGroup = this.touchGroupMap.get(name);
@@ -115,6 +142,8 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                             this.removeTouchCluster(touchGroup);
                             updatedTouchGroupNames.push(name);
                         }
+                        this.cellContext.remove(name);
+                        this.removeTouchGroupConstraint(name);
                     }
                 });
             } else {
@@ -124,6 +153,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     const c = tcb.getCluster();
                     this.touchGroupMap.set(name, c);
                     updatedTouchGroupNames.push(name);
+                    this.addTouchGroupConstraint(c, name);
                 });
             }
             this.updateRelevantTransitionEvents(updatedTouchGroupNames);
@@ -137,7 +167,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     const {p} = op;
                     if (p.length === 1 && op.oi) {
                         const name = p[0];
-                        const pb = new PathBinding(doc, this.props.path.concat(['paths', name]));
+                        const pb = new PathBinding(doc, this.props.path.concat(['paths', name]), this.cellContext);
                         const pathObj = pb.getPath();
                         this.addPath(pathObj);
                         this.pathMap.set(name, pathObj);
@@ -156,7 +186,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             } else {
                 const paths = this.paths.getData();
                 each(paths, (path, name) => {
-                    const pb = new PathBinding(doc, this.props.path.concat(['paths', name]));
+                    const pb = new PathBinding(doc, this.props.path.concat(['paths', name]), this.cellContext);
                     const pathObj = pb.getPath();
                     this.addPath(pathObj);
                     this.pathMap.set(name, pathObj);
@@ -247,7 +277,6 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             };
             if (this.fsm.getActiveState() === fromState) {
                 timeoutID = setTimeout(() => {
-                            console.log('fire');
                             this.fsm.fireTransition(transitionName);
                         }, timeoutDelay);
             }
@@ -310,24 +339,24 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
 
         toAdd.forEach((name) => {
             const touchGroup = this.touchGroupMap.get(name);
-            this.liveUpdaterMap.set(name, { pause: () => null, resume: () => null, run: () => null });
+            this.liveUpdaterMap.set(name, { pause: () => null, resume: () => null,
+                run: () => null, destroy: () => null });
             const liveFn = cjs.liven(() => {
                 const props = ['$xConstraint', '$yConstraint', '$startXConstraint',
                                 '$startYConstraint', '$endXConstraint', '$endYConstraint',
                                 '$rotation', '$scale', '$startRadius', '$radius'];
+                const values = {};
                 props.forEach((prop) => {
-                    const p = [name, prop];
-                    const val = cjs.get(touchGroup[prop]);
-                    if (val !== this.touchGroups.traverse(p)) {
-                        this.touchGroups.submitObjectReplaceOp(p, val);
-                    }
+                    values[prop] = cjs.get(touchGroup[prop]);
                 });
+                this.debouncedPropertyUpdate(name, values);
             });
             this.liveUpdaterMap.set(name, liveFn);
         });
         toRemove.forEach((name) => {
             const liveFn = this.liveUpdaterMap.get(name);
-            liveFn.pause();
+            liveFn.destroy();
+            // liveFn.pause();
             this.liveUpdaterMap.delete(name);
         });
     }

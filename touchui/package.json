@@ -23,7 +23,7 @@
     "@types/react-sortable-hoc": "^0.6.3",
     "@types/snapsvg": "^0.4.34",
     "bootstrap": "^4.1.2",
-    "constraintjs": "^0.9.7",
+    "constraintjs": "^0.9.8-beta3",
     "dagre": "^0.8.2",
     "event-emitter": "^0.3.5",
     "jquery": "^3.3.1",
