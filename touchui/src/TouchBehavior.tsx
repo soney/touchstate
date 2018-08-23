@@ -310,12 +310,14 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
 
         toAdd.forEach((name) => {
             const touchGroup = this.touchGroupMap.get(name);
+            this.liveUpdaterMap.set(name, { pause: () => null, resume: () => null, run: () => null });
             const liveFn = cjs.liven(() => {
-                const props = ['$center', '$endCenter'];
+                const props = ['$xConstraint', '$yConstraint', '$startXConstraint',
+                                '$startYConstraint', '$endXConstraint', '$endYConstraint',
+                                '$rotation', '$scale', '$startRadius', '$radius'];
                 props.forEach((prop) => {
                     const p = [name, prop];
                     const val = cjs.get(touchGroup[prop]);
-                    console.log(val);
                     if (val !== this.touchGroups.traverse(p)) {
                         this.touchGroups.submitObjectReplaceOp(p, val);
                     }

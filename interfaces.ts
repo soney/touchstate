@@ -5,6 +5,12 @@ export interface TouchGroupInterface {
     maxRadius: number;
     maxTouchInterval: number;
     greedy: boolean;
+    $xConstraint?: number;
+    $yConstraint?: number;
+    $startXConstraint?: number;
+    $startYConstraint?: number;
+    $endXConstraint?: number;
+    $endYConstraint?: number;
 }
 
 export type PathType = 'line' | 'circle' | 'rectangle';

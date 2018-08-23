@@ -37,6 +37,12 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
                 <div>maxRadius: <Cell text={`${this.state.maxRadius}`} onChange={this.onMRChange} /></div>
                 <div>maxTouchInterval: <Cell text={`${this.state.maxTouchInterval}`} onChange={this.onMTIChange}/></div>
                 <div>greedy: <Cell text={`${this.state.greedy}`} onChange={this.onGChange} /></div>
+                <div>x: {this.state.$xConstraint}</div>
+                <div>y: {this.state.$yConstraint}</div>
+                <div>startX: {this.state.$startXConstraint}</div>
+                <div>startY: {this.state.$startYConstraint}</div>
+                <div>endX: {this.state.$endXConstraint}</div>
+                <div>endY: {this.state.$endYConstraint}</div>
             </div>
         );
     }
@@ -75,5 +81,18 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
             this.subDoc.submitObjectReplaceOp([], TouchGroupDisplay.defaults);
             this.state = TouchGroupDisplay.defaults;
         }
+        this.subDoc.subscribe((type, ops) => {
+            if (type === 'op') {
+                ops.forEach((op) => {
+                    const { p, oi } = op;
+                    if (p.length === 1 && oi) {
+                        const propName = p[0];
+                        const newState = {};
+                        newState[propName] = oi;
+                        this.setState(newState);
+                    }
+                });
+            }
+        });
     }
 }
