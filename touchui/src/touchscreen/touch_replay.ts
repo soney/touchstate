@@ -70,14 +70,28 @@ export function replayTouches(touch_log, options) {
                             screenX: screen.x,
                             screenY: screen.y,
                             clientX: client.x,
-                            clientY: client.y
+                            clientY: client.y,
+                            force: originalTouch.force
                         });
 
                         if(type === "touchstart" || !touches.hasOwnProperty(newTouch.identifier)) {
-                            var touch = document.createTouch ? document.createTouch(root, target, newTouch.identifier, newTouch.pageX, newTouch.pageY,
-                                                                  newTouch.screenX, newTouch.screenY)//, newTouch.clientY, newTouch.clientY)
-                                                                  : newTouch;
-                            touch.force = originalTouch.force;
+                            var touch;
+                            if(window['Touch']) {
+                                touch = new (Touch as any)(extend({}, newTouch, { target: root }));
+                            } else if(document.createTouch) {
+                                touch = document.createTouch(root, target, newTouch.identifier, newTouch.pageX, newTouch.pageY,
+                                                                  newTouch.screenX, newTouch.screenY); //, newTouch.clientY, newTouch.clientY)
+                            } else {
+                                touch = newTouch;
+                            }
+
+                            try {
+                                if(touch.force !== originalTouch.force) {
+                                    touch.force = originalTouch.force;
+                                }
+                            } catch (e) {
+                                console.error('could not re-assign force');
+                            }
 
                             touches[newTouch.identifier] = touch;
                             touch_targets[newTouch.identifier] = target;
@@ -117,6 +131,14 @@ export function replayTouches(touch_log, options) {
 
                     var touch_list, changed_touch_list, target_touch_list;
 
+                    // if(window['TouchList']) {
+                    //     touch_list = new TouchList();
+                    //     changed_touch_list = new TouchList();
+                    //     target_touch_list = new TouchList();
+                    //     touch_list.push.apply(touch_list, tl);
+                    //     changed_touch_list.push.apply(changed_touch_list, ctl);
+                    //     target_touch_list.push.apply(target_touch_list, ttl);
+                    // } else
                     if(document.createTouchList) {
                         touch_list = document.createTouchList.apply(document, tl);
                         changed_touch_list = document.createTouchList.apply(document, ctl);

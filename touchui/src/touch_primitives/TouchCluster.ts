@@ -565,7 +565,7 @@ export class TouchCluster extends EventEmitter {
 	public postUnsatisfied():void {
 		cjs.wait();
 		this.$usingFingers.forEach(function(touchID) {
-			var touch = touches.get(touchID),
+			var touch = touches.get(parseInt(touchID)),
 				usedBy = touch.get('usedBy'),
 				claimedBy = touch.get('claimedBy'),
 				index = usedBy.indexOf(this);
@@ -587,13 +587,13 @@ export class TouchCluster extends EventEmitter {
 		cjs.signal();
 	};
 
-	public postSatisfied(usingFingers:number[]):void {
+	public postSatisfied(usingFingers:Array<number|string>):void {
 		cjs.wait();
 
 		this.$satisfied.set(true);
 		this.$usingFingers.setValue(usingFingers);
 		each(usingFingers, (touchID) => {
-			var touch = touches.get(touchID),
+			var touch = touches.get(parseInt(touchID as string)),
 				usedBy = touch.get('usedBy');
 			usedBy.push(this);
 		});
