@@ -22,6 +22,7 @@ interface TransitionContentsState {
 }
 
 export class TransitionContents extends React.Component<TransitionContentsProps, TransitionContentsState> {
+    private containerElement: HTMLDivElement;
     public constructor(props: TransitionContentsProps) {
         super(props);
         const payload = this.props.fsm.getTransitionPayload(this.props.fod.getName());
@@ -97,7 +98,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         }
 
         return (
-            <div>
+            <div ref={this.containerRef}>
                 <select value={this.state.type} onChange={this.handleSelectChange}>
                     <option value="none">(none)</option>
                     <option value="timeout">timeout</option>
@@ -112,6 +113,17 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         // super.componentDidUpdate(prevProps, nextProps, snapshot);
         const obj = extend({}, this.state, { 'paths': undefined, 'touchGroups': undefined });
         this.props.fsm.setTransitionPayload(this.props.fod.getName(), obj);
+        this.updateFODDimensions();
+    }
+
+    private containerRef = (el: HTMLDivElement): void => {
+        this.containerElement = el;
+        this.updateFODDimensions();
+    }
+
+    private updateFODDimensions(): void {
+        const { clientWidth, clientHeight } = this.containerElement;
+        this.props.fod.setDimensions(clientWidth + 20, clientHeight + 20);
     }
 
     private onTimeoutChange = (event: React.FormEvent<HTMLInputElement>): void => {
