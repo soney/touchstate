@@ -242,6 +242,12 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             const { transition } = event;
             this.updateEventListener(transition);
         });
+        this.fsm.addListener('activeStateChanged', () => {
+            const payload = this.fsm.getStatePayload(this.fsm.getActiveState());
+            if (payload && payload.markDone) {
+                alert('MARKED DONE');
+            }
+        });
     }
 
     private updateRelevantTransitionEvents(relatedNames: string[]): void {
@@ -292,7 +298,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 if (state === fromState) {
                     timeoutID = setTimeout(() => {
                                     this.fsm.fireTransition(transitionName);
-                                }, timeoutDelay);
+                                }, parseInt(timeoutDelay, 10));
                 }
             };
             const transitionFromChangedListener = (event) => {

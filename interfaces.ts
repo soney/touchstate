@@ -39,12 +39,12 @@ export interface BehaviorDoc {
 }
 
 export interface StateData {
-
+    markDone?: boolean;
 }
 
 export interface TransitionData {
     type: string;
-    timeoutDelay?: number;
+    timeoutDelay?: string;
     selectedTouchGroup?: string;
     selectedPath?: string;
     touchEventType?: string;

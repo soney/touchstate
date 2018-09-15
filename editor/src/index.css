@@ -21,3 +21,24 @@ body {
 .ReactCodeMirror {
     border: 1px solid #EEE;
 }
+
+foreignObject body {
+    background: none;
+}
+
+.transitionContents {
+    background-color: none;
+    font-size: 0.7em;
+    text-align: center;
+    margin: 5px;
+}
+
+.transitionContents input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stateContents {
+    text-align: center;
+    padding: 5px;
+}

@@ -13,7 +13,7 @@ interface TransitionContentsProps {
 }
 interface TransitionContentsState {
     type: string;
-    timeoutDelay?: number;
+    timeoutDelay?: string;
     selectedTouchGroup?: string;
     selectedPath?: string;
     touchEventType?: string;
@@ -35,7 +35,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         } else {
             this.state = {
                 type: 'none',
-                timeoutDelay: 1000,
+                timeoutDelay: '1000',
                 paths: this.props.paths.getData(),
                 touchGroups: this.props.touchGroups.getData()
             };
@@ -47,7 +47,8 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
             this.setState({ touchGroups: this.props.touchGroups.getData() });
         });
         const { fod } = this.props;
-        fod.setDimensions(200, 570);
+        // console.log('k');
+        fod.setDimensions(100, 80);
     }
 
     public render(): React.ReactNode {
@@ -56,7 +57,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         if (type === 'none') {
             typeDetails = <span />;
         } else if (type === 'timeout') {
-            typeDetails = <input type="number" value={this.state.timeoutDelay} onChange={this.onTimeoutChange} />;
+            typeDetails = <input value={this.state.timeoutDelay} onChange={this.onTimeoutChange} />;
         } else if (type === 'touchgroup') {
             let pathSelection: React.ReactNode;
             const touchOptions: React.ReactNode[] = map(this.state.touchGroups, (tg, name) => {
@@ -69,7 +70,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
                 });
                 pathSelection = (
                     <span>
-                        <label>Path:</label>
+                        {/* <label>Path:</label> */}
                         <select value={this.state.selectedPath} onChange={this.handlePathChange}>
                             <option value="none">(none)</option>
                             {pathOptions}
@@ -85,6 +86,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
                         <option value="none">(none)</option>
                         {touchOptions}
                     </select>
+                    <br />
                     {/* <label>Type:</label> */}
                     <select value={this.state.touchEventType} onChange={this.handleTouchEventChange}>
                         {/* <option value="none">(none)</option> */}
@@ -92,13 +94,14 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
                         <option value="end">End</option>
                         <option value="cross">Cross</option>
                     </select>
+                    <br />
                     {pathSelection}
                 </span>
             );
         }
 
         return (
-            <div ref={this.containerRef}>
+            <div className="transitionContents" ref={this.containerRef}>
                 <select value={this.state.type} onChange={this.handleSelectChange}>
                     <option value="none">(none)</option>
                     <option value="timeout">timeout</option>
@@ -128,7 +131,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
 
     private onTimeoutChange = (event: React.FormEvent<HTMLInputElement>): void => {
         const { value } = event.currentTarget;
-        this.setState({ timeoutDelay: parseInt(value, null) });
+        this.setState({ timeoutDelay: value });
     }
 
     private handleSelectChange = (event: React.FormEvent<HTMLSelectElement>): void => {

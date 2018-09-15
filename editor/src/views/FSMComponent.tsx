@@ -6,6 +6,7 @@ import { first, tail } from 'lodash';
 import { SDBDoc, SDBSubDoc } from 'sdb-ts';
 import { DISPLAY_TYPE } from 't2sm/built/views/StateMachineDisplay';
 import * as ReactDOM from 'react-dom';
+import { StateContents } from './StateContents';
 import { TransitionContents } from './TransitionContents';
 import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../../interfaces';
 
@@ -29,7 +30,7 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
 
     public constructor(props: StateMachineDisplayProps) {
         super(props);
-        this.binding = new SDBBinding(this.props.doc, this.props.path, this.getFSM());
+        // this.binding = new SDBBinding(this.props.doc, this.props.path, this.getFSM());
         this.touchGroups = this.props.doc.subDoc(['touchGroups']);
         this.paths = this.props.doc.subDoc(['paths']);
         this.state = {
@@ -53,6 +54,11 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
         if (fod.getDisplayType() === DISPLAY_TYPE.TRANSITION) {
             ReactDOM.render(
                 <TransitionContents fod={fod} fsm={this.props.fsm} touchGroups={this.touchGroups} paths={this.paths} />,
+                container
+            );
+        } else {
+            ReactDOM.render(
+                <StateContents fod={fod} fsm={this.props.fsm} />,
                 container
             );
         }
