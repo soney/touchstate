@@ -242,11 +242,31 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             const { transition } = event;
             this.updateEventListener(transition);
         });
-        this.fsm.addListener('activeStateChanged', () => {
+        this.fsm.addListener('activeStateChanged', (event) => {
+            const { oldActiveState, state } = event;
+            let oTransitions;
+            if (oldActiveState) {
+                oTransitions = this.fsm.getOutgoingTransitions(oldActiveState);
+                oTransitions.forEach((ot) => {
+                    this.updateEventListener(ot);
+                });
+            }
+
+            oTransitions = this.fsm.getOutgoingTransitions(state);
+            oTransitions.forEach((ot) => {
+                this.updateEventListener(ot);
+            });
+
             const payload = this.fsm.getStatePayload(this.fsm.getActiveState());
             if (payload && payload.markDone) {
-                alert('MARKED DONE');
+                setTimeout(() => {
+                    alert('MARKED DONE');
+                }, 10);
             }
+        });
+        const activeState = this.fsm.getActiveState();
+        this.fsm.getOutgoingTransitions(activeState).forEach((t) => {
+            this.updateEventListener(t);
         });
     }
 
@@ -264,7 +284,9 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                     shouldUpdate = true;
                 }
             }
-            this.updateEventListener(transition);
+            if (shouldUpdate) {
+                this.updateEventListener(transition);
+            }
         });
     }
 
@@ -272,6 +294,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         if (this.transitionListeners.has(transition)) {
             const removeTransitionListener = this.transitionListeners.get(transition);
             removeTransitionListener();
+            this.transitionListeners.delete(transition);
         }
 
         if (this.fsm.hasTransition(transition)) {
@@ -287,8 +310,15 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     private getEventListener(transitionName: string): Function {
         const payload = this.fsm.getTransitionPayload(transitionName);
         const { type } = payload;
+        console.log(transitionName, payload);
         if (type === 'timeout') {
             const { timeoutDelay } = payload;
+            let tod: number;
+            try {
+                tod = parseInt(timeoutDelay, 10);
+            } catch (e) {
+                tod = 0;
+            }
             const fromState = this.fsm.getTransitionFrom(transitionName);
             let timeoutID;
             let removeListener: Function;
@@ -296,9 +326,10 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 const { state } = event;
                 if (timeoutID) { clearTimeout(timeoutID); }
                 if (state === fromState) {
+                    console.log(fromState);
                     timeoutID = setTimeout(() => {
                                     this.fsm.fireTransition(transitionName);
-                                }, parseInt(timeoutDelay, 10));
+                                }, tod);
                 }
             };
             const transitionFromChangedListener = (event) => {
@@ -315,7 +346,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             if (this.fsm.getActiveState() === fromState) {
                 timeoutID = setTimeout(() => {
                             this.fsm.fireTransition(transitionName);
-                        }, timeoutDelay);
+                        }, tod);
             }
             this.fsm.addListener('activeStateChanged', activeStateChangedListener);
             this.fsm.addListener('transitionFromChanged', transitionFromChangedListener);
@@ -361,6 +392,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             }
             return () => null;
         } else if (type === 'none' || type === undefined) {
+            debugger;
             return () => null;
         } else {
             console.log(payload);

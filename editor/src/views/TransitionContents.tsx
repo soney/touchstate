@@ -34,7 +34,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
                                 payload);
         } else {
             this.state = {
-                type: 'none',
+                type: 'timeout',
                 timeoutDelay: '1000',
                 paths: this.props.paths.getData(),
                 touchGroups: this.props.touchGroups.getData()
@@ -48,7 +48,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         });
         const { fod } = this.props;
         // console.log('k');
-        fod.setDimensions(100, 80);
+        fod.setDimensions(100, 110);
     }
 
     public render(): React.ReactNode {

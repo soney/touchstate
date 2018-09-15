@@ -39,21 +39,21 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
                     </tr>
                     <tr>
                         <th>x</th>
-                        <td>{this.state.$xConstraint}</td>
+                        <td>{Math.round(this.state.$xConstraint)}</td>
                         <th>y</th>
-                        <td>{this.state.$yConstraint}</td>
+                        <td>{Math.round(this.state.$yConstraint)}</td>
                     </tr>
                     <tr>
                         <th>startX</th>
-                        <td>{this.state.$startXConstraint}</td>
+                        <td>{Math.round(this.state.$startXConstraint)}</td>
                         <th>startY</th>
-                        <td>{this.state.$startYConstraint}</td>
+                        <td>{Math.round(this.state.$startYConstraint)}</td>
                     </tr>
                     <tr>
                         <th>endX</th>
-                        <td>{this.state.$startXConstraint}</td>
+                        <td>{Math.round(this.state.$startXConstraint)}</td>
                         <th>endY</th>
-                        <td>{this.state.$endYConstraint}</td>
+                        <td>{Math.round(this.state.$endYConstraint)}</td>
                     </tr>
                 </tbody>
             </table>

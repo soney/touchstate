@@ -68,7 +68,10 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
 
     private divRef = (el: HTMLElement): void => {
         if (el) {
-            const display = new StateMachineDisplay(this.getFSM(), el, this.getForeignObject);
+            const display = new StateMachineDisplay(this.getFSM(), el, this.getForeignObject, {
+                    animationDuration: 0,
+                    transitionAnimationDuration: 0
+            });
         }
     }
 } 
