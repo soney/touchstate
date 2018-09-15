@@ -1,3 +1,4 @@
+// tslint:disable:max-line-length
 import * as React from 'react';
 import { SDBDoc, SDBSubDoc } from 'sdb-ts';
 import { FSMComponent } from './views/FSMComponent';
@@ -42,8 +43,11 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         const touchGroupDisplays: React.ReactNode[] = map(this.state.touchGroups, (tg, name) => {
             return (
                 <div key={name}>
-                    {name}:
-                    <button onClick={this.removeTouchGroup.bind(this, name)}>Remove</button>
+                    <h5>
+                        <strong>{name}</strong>
+                        <button className="float-right btn btn-sm btn-outline-danger" onClick={this.removeTouchGroup.bind(this, name)}>Delete</button>
+                    </h5>
+                    <hr />
                     <TouchGroupDisplay doc={doc} path={['touchGroups', name]} />
                 </div>
             );
@@ -51,26 +55,37 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         const pathDisplays: React.ReactNode[] = map(this.state.paths, (p, name) => {
             return (
                 <div key={name}>
-                    {name}:
-                    <button onClick={this.removePath.bind(this, name)}>Remove</button>
+                    <h5>{name}
+                    <button className="float-right btn btn-sm btn-outline-danger" onClick={this.removePath.bind(this, name)}>Delete</button>
+                    </h5>
+                    <hr />
                     <PathSpecDisplay doc={doc} path={['paths', name]} />
                 </div>
             );
         });
         return (
             <div>
-                <FSMComponent doc={doc} path={['fsm']} fsm={fsm} />
-                <div className="touchGroups">
-                    <div>
-                        {touchGroupDisplays}
+                <div className="row">
+                    <div className="col">
+                        <FSMComponent doc={doc} path={['fsm']} fsm={fsm} />
                     </div>
-                    <button onClick={this.addTouchGroup}>Add Touch Group</button>
                 </div>
-                <div className="paths">
-                    <div>
-                        {pathDisplays}
+                <hr />
+                <div className="row">
+                    <div className="touchGroups col">
+                        <h2>Touch Groups</h2>
+                        <div>
+                            {touchGroupDisplays}
+                        </div>
+                        <button className="btn btn-dark btn-block" onClick={this.addTouchGroup}>+ Touch Group</button>
                     </div>
-                    <button onClick={this.addPath}>Add Path</button>
+                    <div className="paths col">
+                        <h2>Paths</h2>
+                        <div>
+                            {pathDisplays}
+                        </div>
+                        <button className="btn btn-dark btn-block" onClick={this.addPath}>+ Path</button>
+                    </div>
                 </div>
             </div>
         );

@@ -91,98 +91,140 @@ export class PathSpecDisplay extends React.Component<PathSpecDisplayProps, PathS
         const { type } = this.state;
         if (type === 'line') {
             parameterControls = (
-                <span>
-                    Start: (
-                        <Cell
-                            text={`${this.state.lsx}`}
-                            onChange={this.onCellChange.bind(this, 'lsx')}
-                            key="lineStartX"
-                            placeholder="x"
-                        />,
-                        <Cell
-                            text={`${this.state.lsy}`}
-                            onChange={this.onCellChange.bind(this, 'lsy')}
-                            key="lineStartY"
-                            placeholder="y"
-                        />
-                        ),
-                    End: (
-                        <Cell
-                            text={`${this.state.lex}`}
-                            onChange={this.onCellChange.bind(this, 'lex')}
-                            key="lineEndX"
-                            placeholder="x"
-                        />,
-                        <Cell
-                            text={`${this.state.ley}`}
-                            onChange={this.onCellChange.bind(this, 'ley')}
-                            key="lineEndY"
-                            placeholder="y"
-                        />)
-                </span>
+                <table className="table">
+                    <tbody>
+                        <tr>
+                            <th>startX</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.lsx}`}
+                                    onChange={this.onCellChange.bind(this, 'lsx')}
+                                    key="lineStartX"
+                                    placeholder="x"
+                                />
+                            </td>
+                            <th>startY</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.lsy}`}
+                                    onChange={this.onCellChange.bind(this, 'lsy')}
+                                    key="lineStartY"
+                                    placeholder="y"
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>endX</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.lex}`}
+                                    onChange={this.onCellChange.bind(this, 'lex')}
+                                    key="lineEndX"
+                                    placeholder="x"
+                                />
+                            </td>
+                            <th>endY</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.ley}`}
+                                    onChange={this.onCellChange.bind(this, 'ley')}
+                                    key="lineEndY"
+                                    placeholder="y"
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             );
         } else if (type === 'circle') {
             parameterControls = (
-                <span>
-                    Center: (
-                        <Cell
-                            text={`${this.state.ccx}`}
-                            onChange={this.onCellChange.bind(this, 'ccx')}
-                            key="circleCenterX"
-                            placeholder="x"
-                        />,
-                        <Cell
-                            text={`${this.state.ccy}`}
-                            onChange={this.onCellChange.bind(this, 'ccy')}
-                            key="circleCenterY"
-                            placeholder="y"
-                        />),
-                    Radius:
-                        <Cell
-                            text={`${this.state.ccr}`}
-                            onChange={this.onCellChange.bind(this, 'ccr')}
-                            key="circleRadius"
-                            placeholder="r"
-                        />
-                </span>
+                <table className="table">
+                    <tbody>
+                        <tr>
+                            <th>cx</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.ccx}`}
+                                    onChange={this.onCellChange.bind(this, 'ccx')}
+                                    key="circleCenterX"
+                                    placeholder="x"
+                                />
+                            </td>
+                            <th>cy</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.ccy}`}
+                                    onChange={this.onCellChange.bind(this, 'ccy')}
+                                    key="circleCenterY"
+                                    placeholder="y"
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>r</th>
+                            <td colSpan={3}>
+                                <Cell
+                                    text={`${this.state.ccr}`}
+                                    onChange={this.onCellChange.bind(this, 'ccr')}
+                                    key="circleRadius"
+                                    placeholder="r"
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             );
         } else if (type === 'rectangle') {
             parameterControls = (
-                <span>
-                    x:
-                        <Cell
-                            text={`${this.state.rcx}`}
-                            onChange={this.onCellChange.bind(this, 'rcx')}
-                            key="rectX"
-                            placeholder="x"
-                        />,
-                    y:
-                        <Cell
-                            text={`${this.state.rcy}`}
-                            onChange={this.onCellChange.bind(this, 'rcy')}
-                            key="rectY"
-                            placeholder="y"
-                        />,
-                    width:
-                        <Cell
-                            text={`${this.state.rcw}`}
-                            onChange={this.onCellChange.bind(this, 'rcw')}
-                            key="rectWidth"
-                            placeholder="width"
-                        />,
-                    height:
-                        <Cell
-                            text={`${this.state.rch}`}
-                            onChange={this.onCellChange.bind(this, 'rch')}
-                            key="rectHeight"
-                            placeholder="height"
-                        />
-                </span>
+                <table className="table">
+                    <tbody>
+                        <tr>
+                            <th>x</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.rcx}`}
+                                    onChange={this.onCellChange.bind(this, 'rcx')}
+                                    key="rectX"
+                                    placeholder="x"
+                                />
+                            </td>
+                            <th>y</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.rcy}`}
+                                    onChange={this.onCellChange.bind(this, 'rcy')}
+                                    key="rectY"
+                                    placeholder="y"
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>width</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.rcw}`}
+                                    onChange={this.onCellChange.bind(this, 'rcw')}
+                                    key="rectWidth"
+                                    placeholder="width"
+                                />
+                            </td>
+                            <th>height</th>
+                            <td>
+                                <Cell
+                                    text={`${this.state.rch}`}
+                                    onChange={this.onCellChange.bind(this, 'rch')}
+                                    key="rectHeight"
+                                    placeholder="height"
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             );
         }
         return (
             <div>
-                <select value={this.state.type} onChange={this.handleSelectChange}>
+                <select className="form-control" value={this.state.type} onChange={this.handleSelectChange}>
                     <option value="line">Line</option>
                     <option value="circle">Circle</option>
                     <option value="rectangle">Rectangle</option>

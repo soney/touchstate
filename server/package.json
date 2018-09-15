@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "start": "node build/server/src/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +17,6 @@
     "@types/express": "^4.16.0",
     "express": "^4.16.3",
     "sdb-ts": "^0.2.3",
-    "t2sm": "^0.0.2"
+    "t2sm": "0.0.7"
   }
 }

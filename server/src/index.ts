@@ -11,7 +11,7 @@ const wss = new WebSocket.Server({ server });
 
 const sdbServer = new SDBServer(wss);
 const doc = sdbServer.get<BehaviorDoc>('touchdoc', 'touchdoc');
-doc.createIfEmpty({ fsm: null, touchGroups: {}, paths: {} });
+doc.createIfEmpty({ code: '', fsm: null, touchGroups: {}, paths: {} });
 app.use(express.static('../editor'));
 
 server.listen(port); 

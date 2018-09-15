@@ -80,14 +80,14 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
 
             typeDetails = (
                 <span>
-                    <label>Touch:</label>
+                    {/* <label>Touch:</label> */}
                     <select value={this.state.selectedTouchGroup} onChange={this.handleTouchGroupChange}>
                         <option value="none">(none)</option>
                         {touchOptions}
                     </select>
-                    <label>Type:</label>
+                    {/* <label>Type:</label> */}
                     <select value={this.state.touchEventType} onChange={this.handleTouchEventChange}>
-                        <option value="none">(none)</option>
+                        {/* <option value="none">(none)</option> */}
                         <option value="start">Start</option>
                         <option value="end">End</option>
                         <option value="cross">Cross</option>
