@@ -44,7 +44,7 @@ export class FSMComponent extends React.Component<StateMachineDisplayProps, Stat
         );
     }
 
-    private getForeignObject  = (fod: ForeignObjectDisplay) => {
+    private getForeignObject = (fod: ForeignObjectDisplay) => {
         const el = fod.getElement();
         const body = document.createElement('body');
         const container = document.createElement('div');

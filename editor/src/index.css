@@ -8,3 +8,16 @@ body {
 .nopointer {
     pointer-events: none;
 }
+
+.cell {
+    border: 1px solid #EEE;
+    padding: 2px;
+    text-align: center;
+}
+.cell:hover {
+    background-color: #FAFAFA;
+}
+
+.ReactCodeMirror {
+    border: 1px solid #EEE;
+}

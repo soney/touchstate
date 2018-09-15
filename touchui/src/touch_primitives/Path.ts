@@ -172,6 +172,11 @@ export class Path {
 		return this;
 	};
 
+	public line(x1:numberOrConstraint, y1:numberOrConstraint, x2:numberOrConstraint, y2:numberOrConstraint):this {
+		this.curr_tree_node.push(["M", x1, y1],
+									["L", x2, y2]);
+		return this;
+	};
 	public rect(x:numberOrConstraint, y:numberOrConstraint, width:numberOrConstraint, height:numberOrConstraint):this {
 		let neg_width:number|cjs.Constraint;
 

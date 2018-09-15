@@ -156,15 +156,16 @@ export function replayTouches(touch_log, options) {
                         });
                     }
 
-                    try {
-                        //touch_event = document.createEvent('TouchEvent');
-                        //touch_event.initTouchEvent(changed_touch_list, target_touch_list, touch_list, e.type, root);
-                        touch_event = new TouchEvent(e.type, {
-                            touches: touch_list,
-                            changedTouches: changed_touch_list,
-                            targetTouches: target_touch_list
-                        });
-                    } catch(err) {
+                    // try {
+                    //     //touch_event = document.createEvent('TouchEvent');
+                    //     //touch_event.initTouchEvent(changed_touch_list, target_touch_list, touch_list, e.type, root);
+                    //     throw new Error();
+                    //     touch_event = new TouchEvent(e.type, {
+                    //         touches: touch_list,
+                    //         changedTouches: changed_touch_list,
+                    //         targetTouches: target_touch_list
+                    //     });
+                    // } catch(err) {
                         touch_event = new CustomEvent(type, {
                             bubbles: true,
                             cancelable: false,
@@ -177,7 +178,7 @@ export function replayTouches(touch_log, options) {
                         touch_event.touches = touch_list;
                         touch_event.targetTouches = target_touch_list;
                         touch_event.changedTouches = changed_touch_list;
-                    }
+                    // }
 
                     touch_event.simulated = true;
 

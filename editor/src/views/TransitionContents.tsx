@@ -47,7 +47,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
             this.setState({ touchGroups: this.props.touchGroups.getData() });
         });
         const { fod } = this.props;
-        fod.setDimensions(100, 170);
+        fod.setDimensions(200, 570);
     }
 
     public render(): React.ReactNode {
@@ -123,7 +123,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
 
     private updateFODDimensions(): void {
         const { clientWidth, clientHeight } = this.containerElement;
-        this.props.fod.setDimensions(clientWidth + 20, clientHeight + 20);
+        // this.props.fod.setDimensions(clientWidth + 20, clientHeight + 20);
     }
 
     private onTimeoutChange = (event: React.FormEvent<HTMLInputElement>): void => {

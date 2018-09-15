@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var sdb_ts_1 = require("sdb-ts");
+var path = require("path");
 var http = require("http");
+var ip = require("ip");
 var express = require("express");
 var WebSocket = require("ws");
 var port = 3000;
@@ -10,8 +12,11 @@ var server = http.createServer(app);
 var wss = new WebSocket.Server({ server: server });
 var sdbServer = new sdb_ts_1.SDBServer(wss);
 var doc = sdbServer.get('touchdoc', 'touchdoc');
-doc.createIfEmpty({ fsm: null, touchGroups: {}, paths: {} });
-app.use(express.static('../editor'));
+doc.createIfEmpty({ code: '', fsm: null, touchGroups: {}, paths: {}, codeErrors: [] });
+app.use('/', express.static(path.join('.', 'static')));
+app.use('/editor', express.static(path.join('..', 'editor', 'build')));
+app.use('/code', express.static(path.join('..', 'editor', 'build')));
+app.use('/touchui', express.static(path.join('..', 'touchui', 'build')));
 server.listen(port);
-console.log("Listening on port " + port + ".");
+console.log("Listening at " + ip.address() + ":" + port);
 //# sourceMappingURL=index.js.map

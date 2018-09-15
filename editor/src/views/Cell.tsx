@@ -52,7 +52,7 @@ export class Cell extends React.Component<CellProps, CellState> {
             }
 
             return (
-                <span onClick={this.onClick}>{text}</span>
+                <div className="cell" onClick={this.onClick}>{text}</div>
             );
         } else {
             return (

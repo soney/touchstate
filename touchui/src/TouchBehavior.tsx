@@ -8,6 +8,7 @@ import * as jQuery from 'jquery';
 import './touchscreen/touchscreen_layer';
 import * as SVG from 'svg.js';
 import { Path } from './touch_primitives/Path';
+import { replayTouches } from './touchscreen/touch_replay';
 import { TouchCluster } from './touch_primitives/TouchCluster';
 import { TouchClusterBinding } from './bindings/TouchClusterBinding';
 import { PathBinding } from './bindings/PathBinding';
@@ -15,11 +16,24 @@ import { StateData, TransitionData, BehaviorDoc, TouchGroupObj, PathObj } from '
 import { each, difference, debounce } from 'lodash';
 import { MapConstraint } from 'constraintjs';
 
+const files = [
+    'two finger tap count tap',
+    'left then right'
+];
+
+export interface ReplayOptions {
+    target?: Element;
+    offsetX?: number;
+    offsetY?: number;
+    scaleX?: number;
+    scaleY?: number;
+}
 interface TouchBehaviorProps {
     path: (string|number)[];
     doc: SDBDoc<BehaviorDoc>;
 }
 interface TouchBehaviorState {
+    selectState: string;
 }
 
 export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBehaviorState> {
@@ -46,7 +60,9 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     }, 20);
     public constructor(props: TouchBehaviorProps) {
         super(props);
-        this.state = { };
+        this.state = {
+            selectState: 'replay'
+        };
         this.renderedPromise = new Promise((resolve, reject) => { this.resolveRP = resolve; });
         this.initialize();
         // const x = cjs(500);
@@ -66,8 +82,18 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     }
 
     public render(): React.ReactNode {
+        const options = files.map((f, i) => {
+            return <option key={i} value={f}>{f}</option>;
+        });
         return (
-            <div ref={this.contentRef} />
+            <div ref={this.contentRef}>
+                <div style={{position: 'absolute'}}>
+                    <select value={this.state.selectState} onChange={this.onSelectChange}>
+                        <option value="replay">Replay</option>
+                        {options}
+                    </select>
+                </div>
+            </div>
         );
     }
 
@@ -86,6 +112,11 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     public async removeTouchCluster(tc: TouchCluster): Promise<void> {
         await this.renderedPromise;
         jQuery(this.element)['touchscreen_layer']('removeTouchCluster', tc);
+    }
+
+    private onSelectChange = (event): void => {
+        const { value } = event.target;
+        this.replayFromURL(value);
     }
 
     private contentRef = (element: HTMLDivElement): void => {
@@ -359,5 +390,16 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             // liveFn.pause();
             this.liveUpdaterMap.delete(name);
         });
+    }
+
+    private replayFromURL(name: string): Promise<void> {
+        return this.replayTouchFile(`gesture_recordings/${name}.recording.json`,
+            { target: this.element });
+    }
+
+    private async replayTouchFile(url: string, options?: ReplayOptions): Promise<void> {
+        const touchData = await fetch(url);
+        const data = await touchData.json();
+        replayTouches(data, options);
     }
 }

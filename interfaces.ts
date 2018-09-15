@@ -34,6 +34,8 @@ export interface BehaviorDoc {
     fsm: any;
     touchGroups: TouchGroupObj;
     paths: PathObj;
+    code: string;
+    codeErrors: string[];
 }
 
 export interface StateData {

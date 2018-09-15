@@ -2,14 +2,14 @@
 import * as React from 'react';
 import { SDBDoc, SDBSubDoc } from 'sdb-ts';
 import { FSMComponent } from './views/FSMComponent';
-import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../interfaces';
+import { StateData, TransitionData, TouchGroupObj, PathObj, BehaviorDoc } from '../../interfaces';
 import { TouchGroupDisplay } from './views/TouchGroupDisplay';
 import { PathSpecDisplay } from './views/PathSpecDisplay';
 import { FSM } from 't2sm';
 import { keys, map } from 'lodash';
 
 interface EditorProps {
-    doc: SDBDoc<any>;
+    doc: SDBDoc<BehaviorDoc>;
     fsm: FSM<StateData, TransitionData>;
 }
 interface EditorState {
@@ -17,7 +17,7 @@ interface EditorState {
     paths: PathObj;
 }
 
-export class Editor extends React.Component<EditorProps, EditorState> {
+export class FSMEditor extends React.Component<EditorProps, EditorState> {
     private touchGroups: SDBSubDoc<TouchGroupObj>;
     private paths: SDBSubDoc<PathObj>;
     public constructor(props: EditorProps) {
@@ -44,10 +44,9 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             return (
                 <div key={name}>
                     <h5>
-                        <strong>{name}</strong>
+                        {name}
                         <button className="float-right btn btn-sm btn-outline-danger" onClick={this.removeTouchGroup.bind(this, name)}>Delete</button>
                     </h5>
-                    <hr />
                     <TouchGroupDisplay doc={doc} path={['touchGroups', name]} />
                 </div>
             );
@@ -55,10 +54,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
         const pathDisplays: React.ReactNode[] = map(this.state.paths, (p, name) => {
             return (
                 <div key={name}>
-                    <h5>{name}
-                    <button className="float-right btn btn-sm btn-outline-danger" onClick={this.removePath.bind(this, name)}>Delete</button>
+                    <h5>
+                        {name}
+                        <button className="float-right btn btn-sm btn-outline-danger" onClick={this.removePath.bind(this, name)}>Delete</button>
                     </h5>
-                    <hr />
                     <PathSpecDisplay doc={doc} path={['paths', name]} />
                 </div>
             );
