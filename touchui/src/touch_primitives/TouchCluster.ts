@@ -351,7 +351,7 @@ export class TouchCluster extends EventEmitter {
 		maxRadius: null,
 		maxTouchInterval: 500,
 
-		greedy: true
+		greedy: false
 	};
 	private static tc_id:number = 0;
 	private _id:number = TouchCluster.tc_id++;
