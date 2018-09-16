@@ -8,8 +8,10 @@ import { SDBDoc, SDBClient } from 'sdb-ts';
 import { FSMEditor } from './FSMEditor';
 import { BehaviorDoc, StateData, TransitionData } from '../../interfaces';
 import { CodeEditor } from './CodeEditor';
+import { write } from 'fs';
 
-const client: SDBClient = new SDBClient(new WebSocket(`ws://${window.location.hostname}:3000`));
+const ws = new WebSocket(`ws://${window.location.hostname}:3000`);
+const client: SDBClient = new SDBClient(ws);
 const doc: SDBDoc<BehaviorDoc> = client.get('touchdoc', 'touchdoc');
 let useCodeEditor = window.location.pathname.includes('code');
 // useCodeEditor = true;
@@ -34,3 +36,9 @@ window['fsm' + ''] = fsm;
         document.getElementById('root') as HTMLElement
     );
 })();
+
+function writeToSave(): void {
+    ws.send('save');
+}
+// tslint:disable:no-string-literal
+window['save'] = writeToSave;
