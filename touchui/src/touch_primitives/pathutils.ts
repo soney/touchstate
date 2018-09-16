@@ -1,10 +1,24 @@
 /* tslint:disable */
 import {filter, each, isArray, every, keys, last, map, extend, some, bind, clone, memoize} from 'lodash';
 export function isPointInsidePath(path, x, y) {
-        var bbox = pathBBox(path);
+		var bbox = pathBBox(path);
+		// var bbox = Snap.path.getBBox(path);
         return isPointInsideBBox(bbox, x, y) &&
                (interPathHelper(path, [["M", x, y], ["H", bbox.x2 + 10]], 1) as any) % 2 == 1;
 }
+
+const elproto = Element.prototype,
+        has = "hasOwnProperty",
+        p2s = /,?([a-z]),?/gi,
+        toFloat = parseFloat,
+        math = Math,
+        PI = math.PI,
+        mmin = math.min,
+        mmax = math.max,
+        pow = math.pow,
+        abs = math.abs;
+
+// pathBBox('M -250,300 a 250,250,0,1,1,0,0.0001 Z')
 
 function intersect(x1, y1, x2, y2, x3, y3, x4, y4) {
 	if (
@@ -485,148 +499,149 @@ function catmullRom2bezier(crp, z) {
 	return d;
 }
 
-function path2curve(path?, path2?) {
-	var pth = !path2 && paths(path);
-	if (!path2 && pth.curve) {
-		return pathClone(pth.curve);
-	}
-	var p = pathToAbsolute(path),
-		p2 = path2 && pathToAbsolute(path2),
-		attrs = {x: 0, y: 0, bx: 0, by: 0, X: 0, Y: 0, qx: null, qy: null},
-		attrs2 = {x: 0, y: 0, bx: 0, by: 0, X: 0, Y: 0, qx: null, qy: null},
-		processPath = function (path, d, pcom) {
-			var nx, ny;
-			if (!path) {
-				return ["C", d.x, d.y, d.x, d.y, d.x, d.y];
-			}
-			!(path[0] in {T: 1, Q: 1}) && (d.qx = d.qy = null);
-			switch (path[0]) {
-				case "M":
-					d.X = path[1];
-					d.Y = path[2];
-					break;
-				case "A":
-					path = ["C"].concat(a2c.apply(0, [d.x, d.y].concat(path.slice(1))));
-					break;
-				case "S":
-					if (pcom == "C" || pcom == "S") { // In "S" case we have to take into account, if the previous command is C/S.
-						nx = d.x * 2 - d.bx;          // And reflect the previous
-						ny = d.y * 2 - d.by;          // command's control point relative to the current point.
-					}
-					else {                            // or some else or nothing
-						nx = d.x;
-						ny = d.y;
-					}
-					path = ["C", nx, ny].concat(path.slice(1));
-					break;
-				case "T":
-					if (pcom == "Q" || pcom == "T") { // In "T" case we have to take into account, if the previous command is Q/T.
-						d.qx = d.x * 2 - d.qx;        // And make a reflection similar
-						d.qy = d.y * 2 - d.qy;        // to case "S".
-					}
-					else {                            // or something else or nothing
-						d.qx = d.x;
-						d.qy = d.y;
-					}
-					path = ["C"].concat(q2c(d.x, d.y, d.qx, d.qy, path[1], path[2]));
-					break;
-				case "Q":
-					d.qx = path[1];
-					d.qy = path[2];
-					path = ["C"].concat(q2c(d.x, d.y, path[1], path[2], path[3], path[4]));
-					break;
-				case "L":
-					path = ["C"].concat(l2c(d.x, d.y, path[1], path[2]));
-					break;
-				case "H":
-					path = ["C"].concat(l2c(d.x, d.y, path[1], d.y));
-					break;
-				case "V":
-					path = ["C"].concat(l2c(d.x, d.y, d.x, path[1]));
-					break;
-				case "Z":
-					path = ["C"].concat(l2c(d.x, d.y, d.X, d.Y));
-					break;
-			}
-			return path;
-		},
-		fixArc = function (pp, i) {
-			if (pp[i].length > 7) {
-				pp[i].shift();
-				var pi = pp[i];
-				while (pi.length) {
-					pcoms1[i] = "A"; // if created multiple C:s, their original seg is saved
-					p2 && (pcoms2[i] = "A"); // the same as above
-					pp.splice(i++, 0, ["C"].concat(pi.splice(0, 6)));
-				}
-				pp.splice(i, 1);
-				ii = Math.max(p.length, p2 && p2.length || 0);
-			}
-		},
-		fixM = function (path1, path2, a1, a2, i) {
-			if (path1 && path2 && path1[i][0] == "M" && path2[i][0] != "M") {
-				path2.splice(i, 0, ["M", a2.x, a2.y]);
-				a1.bx = 0;
-				a1.by = 0;
-				a1.x = path1[i][1];
-				a1.y = path1[i][2];
-				ii = Math.max(p.length, p2 && p2.length || 0);
-			}
-		},
-		pcoms1 = [], // path commands of original path p
-		pcoms2 = [], // path commands of original path p2
-		pfirst = "", // temporary holder for original path command
-		pcom = ""; // holder for previous path command of original path
-	for (var i = 0, ii = Math.max(p.length, p2 && p2.length || 0); i < ii; i++) {
-		p[i] && (pfirst = p[i][0]); // save current path command
+    function path2curve(path, path2?) {
+        var pth = !path2 && paths(path);
+        if (!path2 && pth.curve) {
+            return pathClone(pth.curve);
+        }
+        var p = pathToAbsolute(path),
+            p2 = path2 && pathToAbsolute(path2),
+            attrs = {x: 0, y: 0, bx: 0, by: 0, X: 0, Y: 0, qx: null, qy: null},
+            attrs2 = {x: 0, y: 0, bx: 0, by: 0, X: 0, Y: 0, qx: null, qy: null},
+            processPath = function (path, d, pcom) {
+                var nx, ny;
+                if (!path) {
+                    return ["C", d.x, d.y, d.x, d.y, d.x, d.y];
+                }
+                !(path[0] in {T: 1, Q: 1}) && (d.qx = d.qy = null);
+                switch (path[0]) {
+                    case "M":
+                        d.X = path[1];
+                        d.Y = path[2];
+                        break;
+                    case "A":
+                        path = ["C"].concat(a2c.apply(0, [d.x, d.y].concat(path.slice(1))));
+                        break;
+                    case "S":
+                        if (pcom == "C" || pcom == "S") { // In "S" case we have to take into account, if the previous command is C/S.
+                            nx = d.x * 2 - d.bx;          // And reflect the previous
+                            ny = d.y * 2 - d.by;          // command's control point relative to the current point.
+                        }
+                        else {                            // or some else or nothing
+                            nx = d.x;
+                            ny = d.y;
+                        }
+                        path = ["C", nx, ny].concat(path.slice(1));
+                        break;
+                    case "T":
+                        if (pcom == "Q" || pcom == "T") { // In "T" case we have to take into account, if the previous command is Q/T.
+                            d.qx = d.x * 2 - d.qx;        // And make a reflection similar
+                            d.qy = d.y * 2 - d.qy;        // to case "S".
+                        }
+                        else {                            // or something else or nothing
+                            d.qx = d.x;
+                            d.qy = d.y;
+                        }
+                        path = ["C"].concat(q2c(d.x, d.y, d.qx, d.qy, path[1], path[2]));
+                        break;
+                    case "Q":
+                        d.qx = path[1];
+                        d.qy = path[2];
+                        path = ["C"].concat(q2c(d.x, d.y, path[1], path[2], path[3], path[4]));
+                        break;
+                    case "L":
+                        path = ["C"].concat(l2c(d.x, d.y, path[1], path[2]));
+                        break;
+                    case "H":
+                        path = ["C"].concat(l2c(d.x, d.y, path[1], d.y));
+                        break;
+                    case "V":
+                        path = ["C"].concat(l2c(d.x, d.y, d.x, path[1]));
+                        break;
+                    case "Z":
+                        path = ["C"].concat(l2c(d.x, d.y, d.X, d.Y));
+                        break;
+                }
+                return path;
+            },
+            fixArc = function (pp, i) {
+                if (pp[i].length > 7) {
+                    pp[i].shift();
+                    var pi = pp[i];
+                    while (pi.length) {
+                        pcoms1[i] = "A"; // if created multiple C:s, their original seg is saved
+                        p2 && (pcoms2[i] = "A"); // the same as above
+                        pp.splice(i++, 0, ["C"].concat(pi.splice(0, 6)));
+                    }
+                    pp.splice(i, 1);
+                    ii = mmax(p.length, p2 && p2.length || 0);
+                }
+            },
+            fixM = function (path1, path2, a1, a2, i) {
+                if (path1 && path2 && path1[i][0] == "M" && path2[i][0] != "M") {
+                    path2.splice(i, 0, ["M", a2.x, a2.y]);
+                    a1.bx = 0;
+                    a1.by = 0;
+                    a1.x = path1[i][1];
+                    a1.y = path1[i][2];
+                    ii = mmax(p.length, p2 && p2.length || 0);
+                }
+            },
+            pcoms1 = [], // path commands of original path p
+            pcoms2 = [], // path commands of original path p2
+            pfirst = "", // temporary holder for original path command
+			pcom = ""; // holder for previous path command of original path
+        for (var i = 0, ii = mmax(p.length, p2 && p2.length || 0); i < ii; i++) {
+            p[i] && (pfirst = p[i][0]); // save current path command
 
-		if (pfirst != "C") // C is not saved yet, because it may be result of conversion
-		{
-			pcoms1[i] = pfirst; // Save current path command
-			i && ( pcom = pcoms1[i - 1]); // Get previous path command pcom
-		}
-		p[i] = processPath(p[i], attrs, pcom); // Previous path command is inputted to processPath
+            if (pfirst != "C") // C is not saved yet, because it may be result of conversion
+            {
+                pcoms1[i] = pfirst; // Save current path command
+                i && ( pcom = pcoms1[i - 1]); // Get previous path command pcom
+            }
+            p[i] = processPath(p[i], attrs, pcom); // Previous path command is inputted to processPath
 
-		if (pcoms1[i] != "A" && pfirst == "C") pcoms1[i] = "C"; // A is the only command
-		// which may produce multiple C:s
-		// so we have to make sure that C is also C in original path
+            if (pcoms1[i] != "A" && pfirst == "C") pcoms1[i] = "C"; // A is the only command
+            // which may produce multiple C:s
+            // so we have to make sure that C is also C in original path
 
-		fixArc(p, i); // fixArc adds also the right amount of A:s to pcoms1
+            fixArc(p, i); // fixArc adds also the right amount of A:s to pcoms1
 
-		if (p2) { // the same procedures is done to p2
-			p2[i] && (pfirst = p2[i][0]);
-			if (pfirst != "C") {
-				pcoms2[i] = pfirst;
-				i && (pcom = pcoms2[i - 1]);
-			}
-			p2[i] = processPath(p2[i], attrs2, pcom);
+            if (p2) { // the same procedures is done to p2
+                p2[i] && (pfirst = p2[i][0]);
+                if (pfirst != "C") {
+                    pcoms2[i] = pfirst;
+                    i && (pcom = pcoms2[i - 1]);
+                }
+                p2[i] = processPath(p2[i], attrs2, pcom);
 
-			if (pcoms2[i] != "A" && pfirst == "C") {
-				pcoms2[i] = "C";
-			}
+                if (pcoms2[i] != "A" && pfirst == "C") {
+                    pcoms2[i] = "C";
+                }
 
-			fixArc(p2, i);
-		}
-		fixM(p, p2, attrs, attrs2, i);
-		fixM(p2, p, attrs2, attrs, i);
-		var seg = p[i],
-			seg2 = p2 && p2[i],
-			seglen = seg.length,
-			seg2len = p2 && seg2.length;
-		attrs.x = seg[seglen - 2];
-		attrs.y = seg[seglen - 1];
-		attrs.bx = parseFloat(seg[seglen - 4]) || attrs.x;
-		attrs.by = parseFloat(seg[seglen - 3]) || attrs.y;
-		attrs2.bx = p2 && (parseFloat(seg2[seg2len - 4]) || attrs2.x);
-		attrs2.by = p2 && (parseFloat(seg2[seg2len - 3]) || attrs2.y);
-		attrs2.x = p2 && seg2[seg2len - 2];
-		attrs2.y = p2 && seg2[seg2len - 1];
-	}
-	if (!p2) {
-		pth.curve = pathClone(p);
-	}
-	return p2 ? [p, p2] : p;
-}
+                fixArc(p2, i);
+            }
+            fixM(p, p2, attrs, attrs2, i);
+            fixM(p2, p, attrs2, attrs, i);
+            var seg = p[i],
+                seg2 = p2 && p2[i],
+                seglen = seg.length,
+                seg2len = p2 && seg2.length;
+            attrs.x = seg[seglen - 2];
+            attrs.y = seg[seglen - 1];
+            attrs.bx = toFloat(seg[seglen - 4]) || attrs.x;
+            attrs.by = toFloat(seg[seglen - 3]) || attrs.y;
+            attrs2.bx = p2 && (toFloat(seg2[seg2len - 4]) || attrs2.x);
+            attrs2.by = p2 && (toFloat(seg2[seg2len - 3]) || attrs2.y);
+            attrs2.x = p2 && seg2[seg2len - 2];
+            attrs2.y = p2 && seg2[seg2len - 1];
+        }
+        if (!p2) {
+            pth.curve = pathClone(p);
+        }
+        return p2 ? [p, p2] : p;
+    }
+
 
     function l2c(x1, y1, x2, y2) {
         return [x1, y1, x2, y2, x2, y2];
@@ -643,14 +658,36 @@ function path2curve(path?, path2?) {
                 y2
             ];
     }
-function a2c(x1, y1, rx, ry, angle, large_arc_flag, sweep_flag, x2, y2, recursive) {
+function repush(array, item) {
+    for (var i = 0, ii = array.length; i < ii; i++) if (array[i] === item) {
+        return array.push(array.splice(i, 1)[0]);
+    }
+}
+function cacher(f, scope?, postprocessor?) {
+    function newf(...a: any[]) {
+        var arg = Array.prototype.slice.call(arguments, 0),
+            args = arg.join("\u2400"),
+            cache = newf['cache'] = newf['cache'] || {},
+            count = newf['count'] = newf['count'] || [];
+        if (cache[has](args)) {
+            repush(count, args);
+            return postprocessor ? postprocessor(cache[args]) : cache[args];
+        }
+        count.length >= 1e3 && delete cache[count.shift()];
+        count.push(args);
+        cache[args] = f.apply(scope, arg);
+        return postprocessor ? postprocessor(cache[args]) : cache[args];
+    }
+    return newf;
+}
+function a2c(x1, y1, rx, ry, angle, large_arc_flag, sweep_flag, x2, y2, recursive?) {
         // for more information of where this math came from visit:
         // http://www.w3.org/TR/SVG11/implnote.html#ArcImplementationNotes
         var _120 = Math.PI * 120 / 180,
             rad = Math.PI / 180 * (+angle || 0),
             res = [],
             xy,
-            rotate = memoize(function (x, y, rad) {
+            rotate = cacher(function (x, y, rad) {
                 var X = x * Math.cos(rad) - y * Math.sin(rad),
                     Y = x * Math.sin(rad) + y * Math.cos(rad);
                 return {x: X, y: Y};
@@ -809,7 +846,7 @@ function paths(ps) {
 		};
 	}
 	setTimeout(function () {
-		for (var key in p) if (p['hasOwnProperty'](key) && key != ps) {
+		for (var key in p) if (p[has](key) && key != ps) {
 			p[key].sleep--;
 			!p[key].sleep && delete p[key];
 		}
@@ -846,10 +883,10 @@ function pathBBox(path) {
 			y = p[6];
 		}
 	}
-	var xmin = Math.min.apply(0, X),
-		ymin = Math.min.apply(0, Y),
-		xmax = Math.max.apply(0, X),
-		ymax = Math.max.apply(0, Y),
+	var xmin = mmin.apply(0, X),
+		ymin = mmin.apply(0, Y),
+		xmax = mmax.apply(0, X),
+		ymax = mmax.apply(0, Y),
 		bb = box(xmin, ymin, xmax - xmin, ymax - ymin);
 	pth.bbox = clone(bb);
 	return bb;

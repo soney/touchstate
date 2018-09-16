@@ -36,9 +36,10 @@
     "react-dom": "^16.4.1",
     "react-sortable-hoc": "^0.8.3",
     "sdb-ts": "^0.2.5",
+    "snapsvg": "^0.5.1",
     "svg.js": "^2.6.5",
     "svg.pathmorphing.js": "^0.1.3",
-    "t2sm": "0.0.9"
+    "t2sm": "^0.1.3"
   },
   "devDependencies": {
     "react-scripts-ts": "^2.16.0",

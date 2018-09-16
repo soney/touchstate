@@ -14,13 +14,18 @@ const doc: SDBDoc<BehaviorDoc> = client.get('touchdoc', 'touchdoc');
 let useCodeEditor = window.location.pathname.includes('code');
 // useCodeEditor = true;
 
-const fsm: FSM<StateData, TransitionData> = new FSM();
-const binding = new SDBBinding(doc, ['fsm'], fsm);
+const binding = new SDBBinding(doc, ['fsm']);
+const fsm: FSM<StateData, TransitionData> = binding.getFSM() as FSM<StateData, TransitionData>;
 window['fsm' + ''] = fsm;
 
 (async (): Promise<void> => {
     doc.subscribe();
     await doc.fetch();
+    if (fsm.getStates().length === 1) {
+        const s2 = fsm.addState();
+        const t = fsm.addTransition(fsm.getStartState(), s2);
+        fsm.setTransitionPayload(t, { type: 'startTransition'});
+    }
     const editor = useCodeEditor ? <CodeEditor doc={doc} /> : <FSMEditor doc={doc} fsm={fsm} />;
     ReactDOM.render(
         <div className="container">

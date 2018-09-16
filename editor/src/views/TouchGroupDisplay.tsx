@@ -2,21 +2,24 @@
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { Cell, CellChangeEvent } from './Cell';
-import { TouchGroupInterface, TouchGroupObj } from '../../../interfaces';
+import { TouchGroupInterface, TouchGroupObj, PathObj } from '../../../interfaces';
 import { SDBClient, SDBDoc, SDBSubDoc } from 'sdb-ts';
-import { clone, isEqual } from 'lodash';
+import { clone, extend, isEqual, map } from 'lodash';
 
 interface TouchGroupProps {
     path: (string|number)[];
     doc: SDBDoc<any>;
+    paths: SDBSubDoc<PathObj>;
 }
+
 interface TouchGroupState extends TouchGroupInterface {
+    paths: PathObj;
 }
 
 export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGroupState> {
     private static defaults = {
         numFingers: 1,
-        downInside: null,
+        downInside: 'none',
         downOutside: null,
         maxRadius: null,
         maxTouchInterval: null,
@@ -25,17 +28,54 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
     private subDoc: SDBSubDoc<TouchGroupInterface>; 
     public constructor(props: TouchGroupProps) {
         super(props);
-        this.initialize();
+        // this.initialize();
+        this.subDoc = this.props.doc.subDoc<TouchGroupInterface>(this.props.path);
+        const data = this.subDoc.getData();
+        const pathsDoc = { paths: this.props.paths.getData() };
+        if (data && !isEqual(data, {})) {
+            this.state = extend(pathsDoc, data);
+        } else {
+            this.subDoc.submitObjectReplaceOp([], TouchGroupDisplay.defaults);
+            this.state = extend(pathsDoc, TouchGroupDisplay.defaults);
+        }
+        this.subDoc.subscribe((type, ops) => {
+            if (type === 'op') {
+                ops.forEach((op) => {
+                    const { p, oi } = op as any;
+                    if (p.length === 1 && oi) {
+                        const propName = p[0];
+                        const newState = {};
+                        newState[propName] = oi;
+                        this.setState(newState);
+                    }
+                });
+            }
+        });
+        this.props.paths.subscribe(() => {
+            this.setState({ paths: this.props.paths.getData() });
+        });
     }
 
     public render(): React.ReactNode {
         const defaults = TouchGroupDisplay.defaults;
+        const pathOptions: React.ReactNode[] = map(this.state.paths, (p, name) => {
+            return <option key={name} value={name}>{name}</option>;
+        });
         return (
             <table className="table">
                 <tbody>
                     <tr>
                         <th>Fingers</th>
                         <td colSpan={3}><Cell text={`${this.state.numFingers}`} onChange={this.onNFChange} /></td>
+                    </tr>
+                    <tr>
+                        <th>Down Inside</th>
+                        <td colSpan={3}>
+                            <select value={this.state.downInside} onChange={this.downInsideChange}>
+                                <option value="none">(none)</option>
+                                {pathOptions}
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <th>x</th>
@@ -49,12 +89,12 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
                         <th>startY</th>
                         <td>{Math.round(this.state.$startYConstraint)}</td>
                     </tr>
-                    <tr>
+                    {/* <tr>
                         <th>endX</th>
                         <td>{Math.round(this.state.$startXConstraint)}</td>
                         <th>endY</th>
                         <td>{Math.round(this.state.$endYConstraint)}</td>
-                    </tr>
+                    </tr> */}
                 </tbody>
             </table>
             // <div>
@@ -77,6 +117,11 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
         this.subDoc.submitObjectReplaceOp(['numFingers'], event.value);
         this.setState(this.subDoc.getData());
     }
+    private downInsideChange = (event: React.FormEvent<HTMLSelectElement>): void => {
+        const { value } = event.currentTarget;
+        this.subDoc.submitObjectReplaceOp(['downInside'], value);
+        this.setState({ downInside: value });
+    }
     // private onDIChange = async (event: CellChangeEvent) => {
     //     this.subDoc.submitObjectReplaceOp(['downInside'], event.value);
     //     this.setState(this.subDoc.getData());
@@ -98,27 +143,6 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
     //     this.setState(this.subDoc.getData());
     // }
 
-    private async initialize(): Promise<void> {
-        this.subDoc = this.props.doc.subDoc<TouchGroupInterface>(this.props.path);
-        const data = this.subDoc.getData();
-        if (data && !isEqual(data, {})) {
-            this.state = clone(data);
-        } else {
-            this.subDoc.submitObjectReplaceOp([], TouchGroupDisplay.defaults);
-            this.state = TouchGroupDisplay.defaults;
-        }
-        this.subDoc.subscribe((type, ops) => {
-            if (type === 'op') {
-                ops.forEach((op) => {
-                    const { p, oi } = op;
-                    if (p.length === 1 && oi) {
-                        const propName = p[0];
-                        const newState = {};
-                        newState[propName] = oi;
-                        this.setState(newState);
-                    }
-                });
-            }
-        });
-    }
+    // private async initialize(): Promise<void> {
+    // }
 }

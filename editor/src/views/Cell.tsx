@@ -59,6 +59,7 @@ export class Cell extends React.Component<CellProps, CellState> {
                 <input
                     onKeyDown={this.onKeyDown}
                     onChange={this.updateText}
+                    onBlur={this.onBlur}
                     value={this.state.inputText}
                     ref={this.inputRef}
                     placeholder={this.props.placeholder}
@@ -87,6 +88,11 @@ export class Cell extends React.Component<CellProps, CellState> {
 
     private onClick = (event: React.MouseEvent<HTMLSpanElement>): void => {
         this.setState({ state: ClickState.EDITING });
+    }
+    private onBlur = (event: React.FocusEvent<HTMLSpanElement>): void => {
+        this.text = this.state.inputText;
+        this.setState({ state: ClickState.IDLE });
+        this.emitUpdate();
     }
 
     private onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {

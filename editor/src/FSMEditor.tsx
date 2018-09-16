@@ -47,7 +47,7 @@ export class FSMEditor extends React.Component<EditorProps, EditorState> {
                         {name}
                         <button className="float-right btn btn-sm btn-outline-danger" onClick={this.removeTouchGroup.bind(this, name)}>Delete</button>
                     </h5>
-                    <TouchGroupDisplay doc={doc} path={['touchGroups', name]} />
+                    <TouchGroupDisplay doc={doc} path={['touchGroups', name]} paths={this.paths} />
                 </div>
             );
         });

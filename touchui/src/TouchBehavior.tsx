@@ -1,4 +1,5 @@
 /* tslint:disable:no-string-literal*/
+/* tslint:disable:max-line-length*/
 import * as React from 'react';
 import * as cjs from 'constraintjs';
 import { FSM, SDBBinding } from 't2sm';
@@ -134,8 +135,8 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
         mapConstraint.put('y', touchCluster.getYConstraint());
         mapConstraint.put('startX', touchCluster.getStartXConstraint());
         mapConstraint.put('startY', touchCluster.getStartYConstraint());
-        mapConstraint.put('endX', touchCluster.getEndXConstraint());
-        mapConstraint.put('endY', touchCluster.getEndYConstraint());
+        // mapConstraint.put('endX', touchCluster.getEndXConstraint());
+        // mapConstraint.put('endY', touchCluster.getEndYConstraint());
         this.cellContext.put(name, mapConstraint);
     }
 
@@ -153,57 +154,20 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
 
         this.touchGroups = this.props.doc.subDoc(this.props.path.concat(['touchGroups']));
         this.paths = this.props.doc.subDoc(this.props.path.concat(['paths']));
-        this.touchGroups.subscribe((eventType, ops) => {
-            const updatedTouchGroupNames: string[] = [];
-            if (eventType === 'op') {
-                ops.forEach((op) => {
-                    const {p} = op;
-                    if (p.length === 1 && op.oi) {
-                        const name = p[0];
-                        const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
-                        const c = tcb.getCluster();
-                        this.touchGroupMap.set(name, c);
-                        updatedTouchGroupNames.push(name);
-                        this.addTouchGroupConstraint(c, name);
-                    } else if (p.length === 1 && op.od) {
-                        const name = p[0];
-                        const touchGroup = this.touchGroupMap.get(name);
-                        if (touchGroup) {
-                            touchGroup.destroy(true);
-                            this.removeTouchCluster(touchGroup);
-                            updatedTouchGroupNames.push(name);
-                        }
-                        this.cellContext.remove(name);
-                        this.removeTouchGroupConstraint(name);
-                    }
-                });
-            } else {
-                const touchGroups = this.touchGroups.getData();
-                each(touchGroups, (tg, name) => {
-                    const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]));
-                    const c = tcb.getCluster();
-                    this.touchGroupMap.set(name, c);
-                    updatedTouchGroupNames.push(name);
-                    this.addTouchGroupConstraint(c, name);
-                });
-            }
-            this.updateRelevantTransitionEvents(updatedTouchGroupNames);
-            this.updateTouchDisplayListeners();
-        });
 
         this.paths.subscribe((eventType, ops) => {
             const updatedPathNames: string[] = [];
             if (eventType === 'op') {
                 ops.forEach((op) => {
-                    const {p} = op;
-                    if (p.length === 1 && op.oi) {
+                    const { p, oi, od } = op as any;
+                    if (p.length === 1 && oi) {
                         const name = p[0];
                         const pb = new PathBinding(doc, this.props.path.concat(['paths', name]), this.cellContext);
                         const pathObj = pb.getPath();
                         this.addPath(pathObj);
                         this.pathMap.set(name, pathObj);
                         updatedPathNames.push(name);
-                    } else if (p.length === 1 && op.od) {
+                    } else if (p.length === 1 && od) {
                         const name = p[0];
                         const pathObj = this.pathMap.get(name);
                         if (pathObj) {
@@ -225,6 +189,44 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 });
             }
             this.updateRelevantTransitionEvents(updatedPathNames);
+        });
+
+        this.touchGroups.subscribe((eventType, ops) => {
+            const updatedTouchGroupNames: string[] = [];
+            if (eventType === 'op') {
+                ops.forEach((op) => {
+                    const { p, oi, od } = op as any;
+                    if (p.length === 1 && oi) {
+                        const name = p[0];
+                        const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]), this.pathMap);
+                        const c = tcb.getCluster();
+                        this.touchGroupMap.set(name, c);
+                        updatedTouchGroupNames.push(name);
+                        this.addTouchGroupConstraint(c, name);
+                    } else if (p.length === 1 && od) {
+                        const name = p[0];
+                        const touchGroup = this.touchGroupMap.get(name);
+                        if (touchGroup) {
+                            touchGroup.destroy(true);
+                            this.removeTouchCluster(touchGroup);
+                            updatedTouchGroupNames.push(name);
+                        }
+                        this.cellContext.remove(name);
+                        this.removeTouchGroupConstraint(name);
+                    }
+                });
+            } else {
+                const touchGroups = this.touchGroups.getData();
+                each(touchGroups, (tg, name) => {
+                    const tcb = new TouchClusterBinding(doc, this.props.path.concat(['touchGroups', name]), this.pathMap);
+                    const c = tcb.getCluster();
+                    this.touchGroupMap.set(name, c);
+                    updatedTouchGroupNames.push(name);
+                    this.addTouchGroupConstraint(c, name);
+                });
+            }
+            this.updateRelevantTransitionEvents(updatedTouchGroupNames);
+            this.updateTouchDisplayListeners();
         });
         window['fsm' + ''] = this.fsm;
         each(this.fsm.getTransitions(), (transition) => {
@@ -261,6 +263,9 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             if (payload && payload.markDone) {
                 setTimeout(() => {
                     alert('MARKED DONE');
+                    setTimeout(() => {
+                        this.fsm.setActiveState(this.fsm.getStartState());
+                    }, 1000);
                 }, 10);
             }
         });
@@ -310,7 +315,6 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
     private getEventListener(transitionName: string): Function {
         const payload = this.fsm.getTransitionPayload(transitionName);
         const { type } = payload;
-        console.log(transitionName, payload);
         if (type === 'timeout') {
             const { timeoutDelay } = payload;
             let tod: number;
@@ -326,7 +330,6 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 const { state } = event;
                 if (timeoutID) { clearTimeout(timeoutID); }
                 if (state === fromState) {
-                    console.log(fromState);
                     timeoutID = setTimeout(() => {
                                     this.fsm.fireTransition(transitionName);
                                 }, tod);
@@ -391,11 +394,27 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
                 }
             }
             return () => null;
+        } else if (type === 'startTransition') {
+            if (this.fsm.getTransitionFrom(transitionName) === this.fsm.getActiveState()) {
+                this.fsm.fireTransition(transitionName);
+            }
+            const activeStateChangedListener = (event) => {
+                const { state } = event;
+                if (this.fsm.getTransitionFrom(transitionName) === state) {
+                    setTimeout(() => {
+                        this.fsm.fireTransition(transitionName);
+                    }, 1000);
+                }
+            };
+            const removeListener = () => {
+                this.fsm.removeListener('activeStateChanged', activeStateChangedListener);
+            };
+            this.fsm.addListener('activeStateChanged', activeStateChangedListener);
+            return removeListener;
         } else if (type === 'none' || type === undefined) {
-            debugger;
             return () => null;
         } else {
-            console.log(payload);
+            console.log(type);
             return () => null;
         }
     }
@@ -411,9 +430,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             this.liveUpdaterMap.set(name, { pause: () => null, resume: () => null,
                 run: () => null, destroy: () => null });
             const liveFn = cjs.liven(() => {
-                const props = ['$xConstraint', '$yConstraint', '$startXConstraint',
-                                '$startYConstraint', '$endXConstraint', '$endYConstraint',
-                                '$rotation', '$scale', '$startRadius', '$radius'];
+                const props = ['$xConstraint', '$yConstraint', '$startXConstraint', '$startYConstraint'];
                 const values = {};
                 props.forEach((prop) => {
                     values[prop] = cjs.get(touchGroup[prop]);

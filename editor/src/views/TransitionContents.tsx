@@ -4,6 +4,7 @@ import { ForeignObjectDisplay } from 't2sm/built/views/ForeignObjectDisplay';
 import { StateData, TransitionData, TouchGroupObj, PathObj } from '../../../interfaces';
 import { SDBSubDoc } from 'sdb-ts';
 import { extend, map, omitBy } from 'lodash';
+import { Cell } from './Cell';
 
 interface TransitionContentsProps {
     fod: ForeignObjectDisplay;
@@ -29,11 +30,13 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
 
         if (payload) {
             this.state = extend({
+                                    touchEventType: 'start',
                                     paths: this.props.paths.getData(),
                                     touchGroups: this.props.touchGroups.getData() },
                                 payload);
         } else {
             this.state = {
+                touchEventType: 'start',
                 type: 'timeout',
                 timeoutDelay: '1000',
                 paths: this.props.paths.getData(),
@@ -47,8 +50,11 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
             this.setState({ touchGroups: this.props.touchGroups.getData() });
         });
         const { fod } = this.props;
-        // console.log('k');
-        fod.setDimensions(100, 110);
+        if (this.state.type === 'startTransition') {
+            fod.hide();
+        } else {
+            fod.setDimensions(100, 110);
+        }
     }
 
     public render(): React.ReactNode {
@@ -57,7 +63,13 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         if (type === 'none') {
             typeDetails = <span />;
         } else if (type === 'timeout') {
-            typeDetails = <input value={this.state.timeoutDelay} onChange={this.onTimeoutChange} />;
+            typeDetails = (
+                <Cell
+                    text={`${this.state.timeoutDelay}`}
+                    onChange={this.onTimeoutChange}
+                    placeholder={'Delay'}
+                />
+            );
         } else if (type === 'touchgroup') {
             let pathSelection: React.ReactNode;
             const touchOptions: React.ReactNode[] = map(this.state.touchGroups, (tg, name) => {
@@ -129,8 +141,8 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         // this.props.fod.setDimensions(clientWidth + 20, clientHeight + 20);
     }
 
-    private onTimeoutChange = (event: React.FormEvent<HTMLInputElement>): void => {
-        const { value } = event.currentTarget;
+    private onTimeoutChange = (event): void => {
+        const { value } = event;
         this.setState({ timeoutDelay: value });
     }
 
