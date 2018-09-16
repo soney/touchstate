@@ -23,7 +23,8 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
         downOutside: null,
         maxRadius: null,
         maxTouchInterval: null,
-        greedy: false
+        greedy: false,
+        $satisfied: false
     };
     private subDoc: SDBSubDoc<TouchGroupInterface>; 
     public constructor(props: TouchGroupProps) {
@@ -42,7 +43,7 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
             if (type === 'op') {
                 ops.forEach((op) => {
                     const { p, oi } = op as any;
-                    if (p.length === 1 && oi) {
+                    if (p.length === 1 && (oi || oi === false)) {
                         const propName = p[0];
                         const newState = {};
                         newState[propName] = oi;
@@ -61,6 +62,14 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
         const pathOptions: React.ReactNode[] = map(this.state.paths, (p, name) => {
             return <option key={name} value={name}>{name}</option>;
         });
+
+        function pnan(arg: any) {
+            if (isNaN(arg)) {
+                return '';
+            } else {
+                return Math.round(arg);
+            }
+        }
         return (
             <table className="table">
                 <tbody>
@@ -77,24 +86,18 @@ export class TouchGroupDisplay extends React.Component<TouchGroupProps, TouchGro
                             </select>
                         </td>
                     </tr>
-                    <tr>
+                    <tr className={this.state.$satisfied ? 'satisfied' : 'not_satisfied'}>
                         <th>x</th>
-                        <td>{Math.round(this.state.$xConstraint)}</td>
+                        <td>{pnan(this.state.$xConstraint)}</td>
                         <th>y</th>
-                        <td>{Math.round(this.state.$yConstraint)}</td>
+                        <td>{pnan(this.state.$yConstraint)}</td>
                     </tr>
-                    <tr>
+                    <tr className={this.state.$satisfied ? 'satisfied' : 'not_satisfied'}>
                         <th>startX</th>
-                        <td>{Math.round(this.state.$startXConstraint)}</td>
+                        <td>{pnan(this.state.$startXConstraint)}</td>
                         <th>startY</th>
-                        <td>{Math.round(this.state.$startYConstraint)}</td>
+                        <td>{pnan(this.state.$startYConstraint)}</td>
                     </tr>
-                    {/* <tr>
-                        <th>endX</th>
-                        <td>{Math.round(this.state.$startXConstraint)}</td>
-                        <th>endY</th>
-                        <td>{Math.round(this.state.$endYConstraint)}</td>
-                    </tr> */}
                 </tbody>
             </table>
             // <div>

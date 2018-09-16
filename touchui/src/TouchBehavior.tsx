@@ -430,7 +430,7 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             this.liveUpdaterMap.set(name, { pause: () => null, resume: () => null,
                 run: () => null, destroy: () => null });
             const liveFn = cjs.liven(() => {
-                const props = ['$xConstraint', '$yConstraint', '$startXConstraint', '$startYConstraint'];
+                const props = ['$xConstraint', '$yConstraint', '$startXConstraint', '$startYConstraint', '$satisfied'];
                 const values = {};
                 props.forEach((prop) => {
                     values[prop] = cjs.get(touchGroup[prop]);

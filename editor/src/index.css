@@ -42,3 +42,11 @@ foreignObject body {
     text-align: center;
     padding: 5px;
 }
+
+tr.satisfied {
+    /* color: red; */
+}
+tr.not_satisfied {
+    opacity: 0.4;
+    /* color: blue; */
+}

@@ -11,6 +11,7 @@ export interface TouchGroupInterface {
     $startYConstraint?: number;
     $endXConstraint?: number;
     $endYConstraint?: number;
+    $satisfied?: boolean;
 }
 
 export type PathType = 'line' | 'circle' | 'rectangle';
