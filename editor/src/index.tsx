@@ -8,6 +8,7 @@ import { SDBDoc, SDBClient } from 'sdb-ts';
 import { FSMEditor } from './FSMEditor';
 import { BehaviorDoc, StateData, TransitionData } from '../../interfaces';
 import { CodeEditor } from './CodeEditor';
+import { isEmpty } from 'lodash';
 import { write } from 'fs';
 
 const ws = new WebSocket(`ws://${window.location.hostname}:3000`);
@@ -18,11 +19,31 @@ let useCodeEditor = window.location.pathname.includes('code');
 
 const binding = new SDBBinding(doc, ['fsm']);
 const fsm: FSM<StateData, TransitionData> = binding.getFSM() as FSM<StateData, TransitionData>;
+
 window['fsm' + ''] = fsm;
 
 (async (): Promise<void> => {
     doc.subscribe();
     await doc.fetch();
+    fsm.addListener('stateAdded', (event) => {
+        const { state, payload } = event;
+        if (isEmpty(payload)) {
+            fsm.setStatePayload(state, {
+                markDone: false
+            });
+        }
+    });
+    fsm.addListener('transitionAdded', (event) => {
+        const { transition, payload } = event;
+        if (isEmpty(payload)) {
+            setTimeout(() => {
+                fsm.setTransitionPayload(transition, {
+                    timeoutDelay: '1000',
+                    touchEventType: 'start',
+                    type: 'timeout'
+                }); }, 20);
+        }
+    });
     if (fsm.getStates().length === 1) {
         const s2 = fsm.addState();
         const t = fsm.addTransition(fsm.getStartState(), s2);

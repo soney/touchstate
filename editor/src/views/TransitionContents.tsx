@@ -39,7 +39,7 @@ export class TransitionContents extends React.Component<TransitionContentsProps,
         } else {
             this.state = {
                 touchEventType: 'start',
-                type: 'timeout',
+                type: 'none',
                 timeoutDelay: '1000',
                 paths: this.props.paths.getData(),
                 touchGroups: this.props.touchGroups.getData()

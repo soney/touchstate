@@ -229,9 +229,9 @@ export class TouchBehavior extends React.Component<TouchBehaviorProps, TouchBeha
             this.updateTouchDisplayListeners();
         });
         window['fsm' + ''] = this.fsm;
-        each(this.fsm.getTransitions(), (transition) => {
-            this.updateEventListener(transition);
-        });
+        // each(this.fsm.getTransitions(), (transition) => {
+        //     this.updateEventListener(transition);
+        // });
         this.fsm.addListener('transitionPayloadChanged', (event) => {
             const { transition } = event;
             this.updateEventListener(transition);
