@@ -351,7 +351,7 @@ export class TouchCluster extends EventEmitter {
 		maxRadius: null,
 		maxTouchInterval: 500,
 
-		greedy: false
+		greedy: true
 	};
 	private static tc_id:number = 0;
 	private _id:number = TouchCluster.tc_id++;
@@ -740,7 +740,7 @@ export class TouchCluster extends EventEmitter {
 		cjs.wait();
 		this.$claimed.set(true);
 		this.$usingFingers.forEach(function(touchID) {
-			var touch = touches.get(touchID),
+			var touch = touches.get(parseInt(touchID)),
 				claimedBy = touch.get('claimedBy'),
 				usedBy = touch.get('usedBy');
 
